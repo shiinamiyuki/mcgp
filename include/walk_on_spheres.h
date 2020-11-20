@@ -1,3 +1,4 @@
+#pragma once
 // Solve ∆u = 0 over space at given poinst P subject to B on the given boundary
 // mesh (V,F)
 //
@@ -8,7 +9,7 @@
 //   P  #P by 3 list of query positions
 // Outputs:
 //   U  #P by 1 list of values at query positions
-#include <Eigen/Eigen>
+#include <Eigen/Core>
 void walk_on_spheres(
   const Eigen::MatrixXd & V,
   const Eigen::MatrixXi & F,
