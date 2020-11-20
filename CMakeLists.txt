@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(curvature)
+project(mcgp)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ### libIGL options: choose between header only and compiled static library
@@ -18,5 +18,5 @@ file(GLOB SRCFILES src/*.cpp)
 add_library(core ${SRCFILES})
 target_link_libraries(core igl::core igl::opengl igl::opengl_glfw )
 
-add_executable(curvature "main.cpp")
-target_link_libraries(curvature core igl::core igl::opengl igl::opengl_glfw)
+add_executable(mcgp "main.cpp")
+target_link_libraries(mcgp core igl::core igl::opengl igl::opengl_glfw)
