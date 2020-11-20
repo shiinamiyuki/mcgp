@@ -7,8 +7,8 @@ option(LIBIGL_USE_STATIC_LIBRARY     "Use libigl as static library" OFF)
 option(LIBIGL_WITH_OPENGL            "Use OpenGL"         ON)
 option(LIBIGL_WITH_OPENGL_GLFW       "Use GLFW"           ON)
 
-# find_package(LIBIGL REQUIRED)
 add_subdirectory(external/libigl)
+find_package(LIBIGL REQUIRED)
 
 # Add your project files
 include_directories("include/")
