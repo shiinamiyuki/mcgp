@@ -1,5 +1,7 @@
 #include <igl/AABB.h>
 #include <igl/PI.h>
+#include <igl/barycentric_coordinates.h>
+#include <igl/barycentric_interpolation.h>
 #include <igl/point_mesh_squared_distance.h>
 #include <limits>
 #define _USE_MATH_DEFINES
@@ -66,7 +68,20 @@ double walk_on_spheres_single_point(
       x = x_k1;
       steps++;
     } while (R > eps && steps < maxSteps);
-    u += (B[closest_face] + B[closest_face + B[closest_face]]) / 3;
+    if (R < eps) { // on boundary
+      std::array<Eigen::RowVector3d, 3> triangle;
+      triangle[0] = V.row(F(closest_face, 0));
+      triangle[1] = V.row(F(closest_face, 1));
+      triangle[2] = V.row(F(closest_face, 2));
+      Eigen::RowVector3d bc;
+      igl::barycentric_coordinates(Eigen::RowVector3d(x), triangle[0], triangle[1], triangle[2],
+                                   bc);
+      Eigen::Vector3d gx;
+      gx[0] = B[F(closest_face, 0)];
+      gx[1] = B[F(closest_face, 1)];
+      gx[2] = B[F(closest_face, 2)];
+      u += bc * gx;
+    }
     sum += u;
     // dunno how author handles it, but this version will work as well.
   }
