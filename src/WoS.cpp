@@ -10,6 +10,14 @@ double random( double rMin, double rMax ) {
    return u*(rMax-rMin) + rMin;
 }
 
+Eigen::VectorXd random(int N, double rMin, double rMax) {
+  Eigen::VectorXd result(N);
+  for (int i = 0; i < N; i++) {
+    result[i] = random(rMin, rMax);
+  }
+  return result;
+}
+
 void walk_on_spheres(
   const Eigen::MatrixXd & V,
   const Eigen::MatrixXi & F,
@@ -24,36 +32,39 @@ void walk_on_spheres(
   const int maxSteps = 32;
   // they can be set as inputs in the future
 
-  Eigen::Vector3d closest_point;
-  Eigen::Vector3i closest_face;
-  Eigen::VectorXd sqrR(1);
-  for (int i = 0; i < P.rows(); i++) {
-    Eigen::Vector3d x = P.row(i);
-    double sum = 0;
+  Eigen::MatrixXd closest_points;
+  Eigen::MatrixXi closest_faces;
+  Eigen::VectorXd sqrRs;
 
-    for (int j = 0; j < nWalks; j++) { // j is a dummy var
-      int steps = 0;
-      double R = 10000000.;  
-      do {
-        igl::point_mesh_squared_distance(x, V, F, sqrR, closest_face, closest_point);
-        // change to AABB later
-        double theta = random(0, M_PI);
-        double phi = random(0, 2*M_PI);
-        double R = std::sqrt(sqrR[0]);
-        Eigen::Vector3d new_direction(R*std::sin(theta)*std::cos(phi),
-                                      R*std::sin(theta)*std::sin(phi),
-                                      R*std::cos(theta));
+  Eigen::VectorXd sum = Eigen::VectorXd::Zero(P.rows());
 
-        x += new_direction;
-        steps++;
-      } while (R > eps && steps < maxSteps);
+  for (int j = 0; j < nWalks; j++) { // j is a dummy var
+    Eigen::MatrixXd PP(P); //tmp
+    int steps = 0;
+    double R = 10000000.;  
+    do {
+      igl::point_mesh_squared_distance(PP, V, F, sqrRs, closest_faces, closest_points);
+      // change to AABB later
+      Eigen::VectorXd theta = random(P.rows(), 0, M_PI);
+      Eigen::VectorXd phi = random(P.rows(), 0, 2*M_PI);
+      Eigen::VectorXd R = sqrRs.array().sqrt();
 
-      sum += (B[closest_face[0]]+B[closest_face[1]+B[closest_face[2]]])/3;
+      Eigen::MatrixXd new_direction(P.rows(), 3);
+      new_direction.col(0) = R.array() * theta.array().sin() * phi.array().cos();
+      new_direction.col(1) = R.array() * theta.array().sin() * phi.array().sin();
+      new_direction.col(2) = R.array() * theta.array().cos();
+
+      PP += new_direction;
+      steps++;
+    } while (R > eps && steps < maxSteps);
+
+    // the following loop can be improved by eigen, probably.
+    for (int i = 0; i < closest_faces.rows(); i++) {
+      sum[i] += (B[closest_faces(i, 0)]+B[closest_faces(i, 1)+B[closest_faces(i, 2)]])/3;
       // dunno how author handles it, but this version will work as well.
-    }
-
-    U[i] = sum/nWalks;
-
-
+    } 
   }
+
+  U = sum/nWalks;
+
 }
