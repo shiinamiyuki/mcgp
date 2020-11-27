@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
   Eigen::MatrixXd V;
   Eigen::MatrixXi F;
   igl::read_triangle_mesh(
-    (argc>1?argv[1]:"../data/sphere-noisy.obj"),V,F);
+    (argc>1?argv[1]:"../data/icosphere.obj"),V,F);
 
   igl::opengl::glfw::Viewer viewer;
   const auto & update = [&]()
@@ -23,12 +23,12 @@ int main(int argc, char *argv[]){
   std::cout << nV << std::endl;
   std::cout << V.mean() << std::endl;
   Eigen::VectorXd B(nV);
-  auto solf = [](Eigen::Vector3d v) { return v[0]*v[0] - v[1]*v[1] + v[2]; }; // x^2 - y^2 + z
+  auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2]); }; // x^2 - y^2 + z
 
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
-
+  std::cout << B.mean() << std::endl;
   int nquery = 3;
   Eigen::MatrixXd P(nquery, 3);
   Eigen::VectorXd U(nquery), sol(nquery);

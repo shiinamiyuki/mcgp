@@ -4,16 +4,21 @@
 #include <igl/barycentric_interpolation.h>
 #include <igl/point_mesh_squared_distance.h>
 #include <limits>
+#include <igl/parallel_for.h>
+#include <random>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <green.h>
 // returns a random value in the range [rMin,rMax]
 // Copied from
 // http://www.cs.cmu.edu/~kmcrane/Projects/MonteCarloGeometryProcessing/WoSLaplace2D.cpp.html
+static thread_local std::random_device rd;
 double random(double rMin, double rMax) {
-  const double rRandMax = 1. / (double)RAND_MAX;
-  double u = rRandMax * (double)rand();
-  return u * (rMax - rMin) + rMin;
+  // const double rRandMax = 1. / (double)RAND_MAX;
+  // double u = rRandMax * (double)rand();
+  // return u * (rMax - rMin) + rMin;
+  std::uniform_real_distribution<double> dist(rMin, rMax);
+  return dist(rd);
 }
 
 Eigen::VectorXd random(int N, double rMin, double rMax) {
@@ -45,16 +50,18 @@ double walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.01;
-  const int nWalks = 4096;
+  const int nWalks = 12800;
   const int maxSteps = 32;
 
   double sum = 0;
-  int closest_face;
+ 
   for (int j = 0; j < nWalks; j++) { // j is a dummy var
     Eigen::Vector3d x(P);            // tmp
+     int closest_face;
     int steps = 0;
     double R = 10000000.;
     double u = 0;
+    // printf("start\n");
     do {
 
       Eigen::RowVector3d _closest;
@@ -62,13 +69,14 @@ double walk_on_spheres_single_point(
 
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
       R = sqrt(sqrR);
+      // printf("%lf\n", R);
       Eigen::Vector3d x_k1 = x + new_direction * R;
       Eigen::Vector3d y = uniform_ball_sampling() * R;
       u += R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
       steps++;
     } while (R > eps && steps < maxSteps);
-    if (R < eps) { // on boundary
+    if (R <= eps) { // on boundary
       // std::array<Eigen::RowVector3d, 3> triangle;
       // triangle[0] = V.row(F(closest_face, 0));
       // triangle[1] = V.row(F(closest_face, 1));
@@ -93,10 +101,9 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
   igl::AABB<Eigen::MatrixXd, 3> aabb;
   aabb.init(V, F);
   U.resize(P.rows());
-
-  for (int i = 0; i < P.rows(); i++) {
+  igl::parallel_for(P.rows(), [&](int i){
     U[i] = walk_on_spheres_single_point(aabb, V, F, B, f, P.row(i));
-  }
+  });
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
