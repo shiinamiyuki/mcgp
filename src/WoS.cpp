@@ -45,7 +45,7 @@ double walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.01;
-  const int nWalks = 128;
+  const int nWalks = 4096;
   const int maxSteps = 32;
 
   double sum = 0;
