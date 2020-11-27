@@ -11,6 +11,7 @@
 //   U  #P by 1 list of values at query positions
 #include <Eigen/Core>
 #include <functional>
+#include <igl/embree/EmbreeIntersector.h>
 void walk_on_spheres(
   const Eigen::MatrixXd & V,
   const Eigen::MatrixXi & F,
@@ -32,9 +33,9 @@ void walk_on_spheres(
 //   U  #P by 1 list of values at query positions
 
 void walk_on_spheres(
-  const Eigen::MatrixXd & V,
-  const Eigen::MatrixXi & F,
-  const Eigen::VectorXd & B,
-  const Eigen::MatrixXd & P,
-  const std::function<double(const Eigen::Vector3d)> && f,
-  Eigen::VectorXd & U);
+  const Eigen::MatrixXd &V,
+  const Eigen::MatrixXi &F,
+  const Eigen::VectorXd &B,
+  const Eigen::MatrixXd &P,
+  const std::function<double(const Eigen::Vector3d)> &f,
+  Eigen::VectorXd &U);
