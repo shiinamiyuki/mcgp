@@ -51,9 +51,9 @@ double walk_on_spheres_single_point(
     const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
-  const double eps = 0.001;
-  const int nWalks = 128;
-  const int maxSteps = 32;
+  const double eps = 0.01;
+  const int nWalks = 32;
+  const int maxSteps = 16;
 
   double sum = 0;
  
@@ -63,21 +63,37 @@ double walk_on_spheres_single_point(
     int steps = 0;
     double R = 10000000.;
     double u = 0;
-    for(int steps =0 ; steps < maxSteps; steps++) {
+    double R_last;
+    double k = 1;
+    for(int steps =0 ;; steps++) {
 
-      Eigen::RowVector3d _closest;
-      // int face_aabb;
-      // double sqrR = aabb.squared_distance(V, F, x, face_aabb, _closest);
+      // Eigen::RowVector3d _closest;
+      // int closest_face;
+      // double sqrR = aabb.squared_distance(V, F, x, closest_face, _closest);
+      // R = sqrt(sqrR);
       // double distance;
       float distance;
       ei->distance(x.cast<float>(), distance, closest_face);
       R = distance;
       if(R < eps)break;
+      if(steps < maxSteps){
+        R_last = R;
+      }
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
       Eigen::Vector3d x_k1 = x + new_direction * R;
       Eigen::Vector3d y = uniform_ball_sampling() * R;
-      u += R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
+      u += k * R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
+      if(steps >= maxSteps){
+        auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
+        if(random(0, 1) < continue_prob){
+          k /= continue_prob;
+        }else{
+          // printf("exit at %d steps\n", steps);
+          break;
+        }
+        R_last = std::min(R_last, R);
+      }
     }
     if (R <= eps) { // on boundary
       std::array<Eigen::RowVector3d, 3> triangle;
@@ -91,15 +107,10 @@ double walk_on_spheres_single_point(
       gx[0] = B[F(closest_face, 0)];
       gx[1] = B[F(closest_face, 1)];
       gx[2] = B[F(closest_face, 2)];
-      u += bc * gx;
-      // u += (B[F(closest_face, 0)] + B[F(closest_face, 1)] + B[F(closest_face, 2)])/3;
+      u += k * bc * gx;
     }
     sum += u;
-    // if(j % 1000 == 0 && j > 0){
-      // printf("1000 walks\n");
-    // }
   }
-  // std::cout << "done " << P << std::endl;
   return sum / nWalks;
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
