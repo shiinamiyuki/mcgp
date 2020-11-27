@@ -81,8 +81,8 @@ double walk_on_spheres_single_point(
       }
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
       Eigen::Vector3d x_k1 = x + new_direction * R;
-      Eigen::Vector3d y = uniform_ball_sampling() * R;
-      u += k * R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
+      Eigen::Vector3d y = x + uniform_ball_sampling() * R;
+      u += k * R * f(y) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
       if(steps >= maxSteps){
         break;
