@@ -2,6 +2,7 @@
 #include <igl/read_triangle_mesh.h>
 #include <igl/parula.h>
 #include <igl/png/writePNG.h>
+#include <igl/PI.h>
 #include <iostream>
 #include "WoS.h"
 #include <igl/opengl/glfw/Viewer.h>
@@ -24,14 +25,14 @@ int main(int argc, char *argv[]){
   std::cout << nV << std::endl;
   std::cout << V.mean() << std::endl;
   Eigen::VectorXd B(nV);
-  auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2]); }; // x^2 - y^2 + z
-
+  // auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2]); }; // x^2 - y^2 + z
+  auto solf = [](Eigen::Vector3d v) { return sin(igl::PI * v[1]) * cos(igl::PI * v[0]);};
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
   std::cout << B.mean() << std::endl;
 
-  int w = 128, h = 128;
+  int w = 256, h = 256;
   int nquery = w * h;
   Eigen::MatrixXd P(nquery, 3);
   Eigen::VectorXd U(nquery), sol(nquery);
@@ -44,7 +45,9 @@ int main(int argc, char *argv[]){
       P.row(i) = Eigen::Vector3d(2 * (double(x) / w ) - 1,2 * (double(y) / h ) - 1,0.0);
     }
   }
-  walk_on_spheres(V, F, B, P, U);
+  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double {
+    return -2 * igl::PI * igl::PI * sin(igl::PI * v[1]) * cos(igl::PI * v[0]);
+   }, U);
 
   for (int i = 0; i < nquery; i++) {
     sol[i] = solf(P.row(i));
