@@ -69,21 +69,20 @@ double walk_on_spheres_single_point(
       steps++;
     } while (R > eps && steps < maxSteps);
     if (R < eps) { // on boundary
-      std::array<Eigen::RowVector3d, 3> triangle;
-      triangle[0] = V.row(F(closest_face, 0));
-      triangle[1] = V.row(F(closest_face, 1));
-      triangle[2] = V.row(F(closest_face, 2));
-      Eigen::RowVector3d bc;
-      igl::barycentric_coordinates(Eigen::RowVector3d(x), triangle[0], triangle[1], triangle[2],
-                                   bc);
-      Eigen::Vector3d gx;
-      gx[0] = B[F(closest_face, 0)];
-      gx[1] = B[F(closest_face, 1)];
-      gx[2] = B[F(closest_face, 2)];
-      u += bc * gx;
+      // std::array<Eigen::RowVector3d, 3> triangle;
+      // triangle[0] = V.row(F(closest_face, 0));
+      // triangle[1] = V.row(F(closest_face, 1));
+      // triangle[2] = V.row(F(closest_face, 2));
+      // Eigen::RowVector3d bc;
+      // igl::barycentric_coordinates(Eigen::RowVector3d(x), triangle[0], triangle[1], triangle[2],
+      //                              bc);
+      // Eigen::Vector3d gx;
+      // gx[0] = B[F(closest_face, 0)];
+      // gx[1] = B[F(closest_face, 1)];
+      // gx[2] = B[F(closest_face, 2)];
+      u += (B[F(closest_face, 0)] + B[F(closest_face, 1)] + B[F(closest_face, 2)])/3;
     }
     sum += u;
-    // dunno how author handles it, but this version will work as well.
   }
   return sum / nWalks;
 }
