@@ -9,6 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <green.h>
+#include <WoS.h>
 // returns a random value in the range [rMin,rMax]
 // Copied from
 // http://www.cs.cmu.edu/~kmcrane/Projects/MonteCarloGeometryProcessing/WoSLaplace2D.cpp.html
@@ -45,12 +46,13 @@ Eigen::Vector3d uniform_ball_sampling() {
 double sphere_volume(double R) { return 4.0 / 3.0 * igl::PI * R * R * R; }
 // single point estimator for ∆u = f
 double walk_on_spheres_single_point(
-    const igl::AABB<Eigen::MatrixXd, 3> &aabb, const Eigen::MatrixXd &V,
+    const igl::AABB<Eigen::MatrixXd, 3> & aabb, 
+    igl::embree::EmbreeIntersector * ei, const Eigen::MatrixXd &V,
     const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
-  const double eps = 0.01;
-  const int nWalks = 12800;
+  const double eps = 0.001;
+  const int nWalks = 128;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -61,37 +63,43 @@ double walk_on_spheres_single_point(
     int steps = 0;
     double R = 10000000.;
     double u = 0;
-    // printf("start\n");
-    do {
+    for(int steps =0 ; steps < maxSteps; steps++) {
 
       Eigen::RowVector3d _closest;
-      double sqrR = aabb.squared_distance(V, F, x, closest_face, _closest);
-
+      // int face_aabb;
+      // double sqrR = aabb.squared_distance(V, F, x, face_aabb, _closest);
+      // double distance;
+      float distance;
+      ei->distance(x.cast<float>(), distance, closest_face);
+      R = distance;
+      if(R < eps)break;
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
-      R = sqrt(sqrR);
-      // printf("%lf\n", R);
       Eigen::Vector3d x_k1 = x + new_direction * R;
       Eigen::Vector3d y = uniform_ball_sampling() * R;
       u += R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
-      steps++;
-    } while (R > eps && steps < maxSteps);
+    }
     if (R <= eps) { // on boundary
-      // std::array<Eigen::RowVector3d, 3> triangle;
-      // triangle[0] = V.row(F(closest_face, 0));
-      // triangle[1] = V.row(F(closest_face, 1));
-      // triangle[2] = V.row(F(closest_face, 2));
-      // Eigen::RowVector3d bc;
-      // igl::barycentric_coordinates(Eigen::RowVector3d(x), triangle[0], triangle[1], triangle[2],
-      //                              bc);
-      // Eigen::Vector3d gx;
-      // gx[0] = B[F(closest_face, 0)];
-      // gx[1] = B[F(closest_face, 1)];
-      // gx[2] = B[F(closest_face, 2)];
-      u += (B[F(closest_face, 0)] + B[F(closest_face, 1)] + B[F(closest_face, 2)])/3;
+      std::array<Eigen::RowVector3d, 3> triangle;
+      triangle[0] = V.row(F(closest_face, 0));
+      triangle[1] = V.row(F(closest_face, 1));
+      triangle[2] = V.row(F(closest_face, 2));
+      Eigen::RowVector3d bc;
+      igl::barycentric_coordinates(Eigen::RowVector3d(x), triangle[0], triangle[1], triangle[2],
+                                   bc);
+      Eigen::Vector3d gx;
+      gx[0] = B[F(closest_face, 0)];
+      gx[1] = B[F(closest_face, 1)];
+      gx[2] = B[F(closest_face, 2)];
+      u += bc * gx;
+      // u += (B[F(closest_face, 0)] + B[F(closest_face, 1)] + B[F(closest_face, 2)])/3;
     }
     sum += u;
+    // if(j % 1000 == 0 && j > 0){
+      // printf("1000 walks\n");
+    // }
   }
+  // std::cout << "done " << P << std::endl;
   return sum / nWalks;
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
@@ -101,8 +109,11 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
   igl::AABB<Eigen::MatrixXd, 3> aabb;
   aabb.init(V, F);
   U.resize(P.rows());
+  Eigen::MatrixXf Vf = V.cast<float>();
+  igl::embree::EmbreeIntersector ei;
+  ei.init(Vf, F);
   igl::parallel_for(P.rows(), [&](int i){
-    U[i] = walk_on_spheres_single_point(aabb, V, F, B, f, P.row(i));
+    U[i] = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i));
   });
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,

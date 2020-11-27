@@ -1,3 +1,6 @@
 [submodule "external/libigl"]
 	path = external/libigl
 	url = https://github.com/libigl/libigl/
+[submodule "external/my-libigl"]
+	path = external/my-libigl
+	url = https://github.com/shiinamiyuki/libigl/
