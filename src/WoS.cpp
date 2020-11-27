@@ -51,8 +51,8 @@ double walk_on_spheres_single_point(
     const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
-  const double eps = 0.01;
-  const int nWalks = 32;
+  const double eps = 0.001;
+  const int nWalks = 4;
   const int maxSteps = 16;
 
   double sum = 0;
@@ -85,6 +85,7 @@ double walk_on_spheres_single_point(
       u += k * R * f(x) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
       if(steps >= maxSteps){
+        break;
         auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
         if(random(0, 1) < continue_prob){
           k /= continue_prob;
