@@ -52,7 +52,7 @@ double walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.001;
-  const int nWalks = 256;
+  const int nWalks = 32;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -82,7 +82,7 @@ double walk_on_spheres_single_point(
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
       Eigen::Vector3d x_k1 = x + new_direction * R;
       Eigen::Vector3d y = x + uniform_ball_sampling() * R;
-      u += k * R * f(y) * harmonic_green(x, y, R) * sphere_volume(R);
+      u += k * R * f(y) * lapg3d(x, y, R) * sphere_volume(R);
       x = x_k1;
       if(steps >= maxSteps){
         auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
@@ -109,7 +109,8 @@ double walk_on_spheres_single_point(
       gx[2] = B[F(closest_face, 2)];
       u += k * bc * gx;
     }
-    sum += u;
+    if(!std::isnan(u))
+      sum += u;
   }
   return sum / nWalks;
 }
