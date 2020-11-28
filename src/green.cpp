@@ -13,5 +13,9 @@ double lapg3d(
   double r, 
   double R)
 {
-  return (R-r) / (4*igl::PI*r*R);
+  auto g =  (R-r) / (4*igl::PI*r*R);
+  if(!std::isfinite(g)){
+    return 0.0;
+  }
+  return g;
 }
