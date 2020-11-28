@@ -61,9 +61,9 @@ int main(int argc, char *argv[]){
     for(int x = 0; x < w;x++){
       for(int y = 0; y < h;y++){
         int i = x + y * w;
-        R(x, y) = unsigned char(u[i] * 255);
-        G(x, y) = unsigned char(u[i] * 255);
-        B(x, y) = unsigned char(u[i] * 255);
+        R(x, y) = (unsigned char)(u[i] * 255);
+        G(x, y) = (unsigned char)(u[i] * 255);
+        B(x, y) = (unsigned char)(u[i] * 255);
         A(x, y) = 255;
       }
     }
