@@ -19,3 +19,15 @@ double lapg3d(
   }
   return g;
 }
+Eigen::Vector3d lapdg3d(
+  Eigen::Vector3d & x, 
+  Eigen::Vector3d & y, 
+  double R)
+{
+  double r = (x-y).norm();
+  Eigen::Vector3d dg = (y-x)*(1/pow(r,3) - 1/pow(R,3))/(4*igl::PI);
+  if(!std::isfinite(dg[0]) || !std::isfinite(dg[1]) || !std::isfinite(dg[2])){
+    return Eigen::Vector3d::Zero();
+  }
+  return dg;
+}
