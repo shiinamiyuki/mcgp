@@ -56,16 +56,22 @@ double walk_on_spheres_single_point(
   const int maxSteps = 32;
 
   double sum = 0;
+  Eigen::Vector3d sumgrad = Eigen::Vector3d::Zero();
  
   for (int j = 0; j < nWalks; j++) { // j is a dummy var
     Eigen::Vector3d x(P);            // tmp
-     int closest_face;
+    int closest_face;
     int steps = 0;
     double R = 10000000.;
     double u = 0;
     double R_last;
     double k = 1;
-    for(int steps =0 ;; steps++) {
+
+    Eigen::Vector3d grad = Eigen::Vector3d::Zero();
+
+    Eigen::Vector3d first_direction;
+    double first_R;
+    for(int steps = 0 ;; steps++) {
 
       // Eigen::RowVector3d _closest;
       // int closest_face;
@@ -79,12 +85,23 @@ double walk_on_spheres_single_point(
       if(steps < maxSteps){
         R_last = R;
       }
+
       Eigen::Vector3d new_direction = uniform_sphere_sampling();
+
       Eigen::Vector3d x_k1 = x + new_direction * R;
+
       double r = sqrt(random(0, 1)) * R;
       Eigen::Vector3d y = x + uniform_sphere_sampling() * r;
       u += k * f(y) * lapg3d(r, R) * sphere_volume(R);
+
+      if (steps == 0) {
+        first_direction = new_direction;
+        first_R = R;
+        grad = sphere_volume(R) * f(y) * lapdg3d(x,y,R);
+      }
+
       x = x_k1;
+
       if(steps >= maxSteps){
         auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
         if(std::isfinite(continue_prob) && random(0, 1) < continue_prob){
@@ -110,8 +127,10 @@ double walk_on_spheres_single_point(
       gx[2] = B[F(closest_face, 2)];
       u += k * bc * gx;
     }
-    if(!std::isnan(u))
+    if(!std::isnan(u)) {
       sum += u;
+      sumgrad += u*first_direction*3/first_R + grad;
+    }
   }
   return sum / nWalks;
 }

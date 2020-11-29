@@ -15,3 +15,8 @@ inline double harmonic_green(const Eigen::Vector3d  & x, const Eigen::Vector3d  
   double r =(x-y).norm();
   return 1/(2*igl::PI)*std::log(R / r);
 }
+
+Eigen::Vector3d lapdg3d(
+  Eigen::Vector3d & x, 
+  Eigen::Vector3d & y, 
+  double R);
