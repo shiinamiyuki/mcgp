@@ -31,6 +31,7 @@ void walk_on_spheres(
 //   F  R^3 -> R function
 // Outputs:
 //   U  #P by 1 list of values at query positions
+//   U_grad #P by 3 matrix of gradient of u
 
 void walk_on_spheres(
   const Eigen::MatrixXd &V,
@@ -38,4 +39,18 @@ void walk_on_spheres(
   const Eigen::VectorXd &B,
   const Eigen::MatrixXd &P,
   const std::function<double(const Eigen::Vector3d)> &f,
-  Eigen::VectorXd &U);
+  Eigen::VectorXd &U,
+  Eigen::MatrixXd &U_grad);
+
+
+inline void walk_on_spheres(
+  const Eigen::MatrixXd &V,
+  const Eigen::MatrixXi &F,
+  const Eigen::VectorXd &B,
+  const Eigen::MatrixXd &P,
+  const std::function<double(const Eigen::Vector3d)> &f,
+  Eigen::VectorXd &U){
+    Eigen::MatrixXd U_grad;
+  walk_on_spheres(V,F,B,P,f, U, U_grad);
+}
+

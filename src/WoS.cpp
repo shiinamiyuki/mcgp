@@ -6,18 +6,15 @@
 #include <limits>
 #include <igl/parallel_for.h>
 #include <random>
+#include <tuple>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <green.h>
 #include <WoS.h>
+
 // returns a random value in the range [rMin,rMax]
-// Copied from
-// http://www.cs.cmu.edu/~kmcrane/Projects/MonteCarloGeometryProcessing/WoSLaplace2D.cpp.html
 static thread_local std::random_device rd;
 double random(double rMin, double rMax) {
-  // const double rRandMax = 1. / (double)RAND_MAX;
-  // double u = rRandMax * (double)rand();
-  // return u * (rMax - rMin) + rMin;
   std::uniform_real_distribution<double> dist(rMin, rMax);
   return dist(rd);
 }
@@ -45,7 +42,7 @@ Eigen::Vector3d uniform_ball_sampling() {
 }
 double sphere_volume(double R) { return 4.0 / 3.0 * igl::PI * R * R * R; }
 // single point estimator for ∆u = f
-double walk_on_spheres_single_point(
+std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     const igl::AABB<Eigen::MatrixXd, 3> & aabb, 
     igl::embree::EmbreeIntersector * ei, const Eigen::MatrixXd &V,
     const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
@@ -132,12 +129,13 @@ double walk_on_spheres_single_point(
       sumgrad += u*first_direction*3/first_R + grad;
     }
   }
-  return sum / nWalks;
+  return std::make_pair(sum / nWalks, sumgrad / nWalks);
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      const std::function<double(const Eigen::Vector3d)> &f,
-                     Eigen::VectorXd &U) {
+                     Eigen::VectorXd &U,
+                     Eigen::MatrixXd &U_grad) {
   igl::AABB<Eigen::MatrixXd, 3> aabb;
   aabb.init(V, F);
   U.resize(P.rows());
@@ -145,12 +143,15 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
   igl::embree::EmbreeIntersector ei;
   ei.init(Vf, F);
   igl::parallel_for(P.rows(), [&](int i){
-    U[i] = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i));
+    double u;
+    Eigen::Vector3d grad;
+    std::tie(u, grad) = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i));
   });
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      Eigen::VectorXd &U) {
+                         Eigen::MatrixXd U_grad;
   return walk_on_spheres(
-      V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U);
+      V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U, U_grad);
 }
