@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
   // auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2] + sin(v[2])); }; // x^2 - y^2 + z
   // auto solf = [](Eigen::Vector3d v) { return sin(igl::PI * v[1]) * cos(igl::PI * v[0]);};
   auto solf = [](Eigen::Vector3d v) { return 1/(Eigen::Vector3d(1.0,1.0,1.0)-v).norm(); }; 
-  auto solf_grad = [](Eigen::Vector3d v) { return (Eigen::Vector3d(1.0,1.0,1.0)-v)/pow((Eigen::Vector3d(1.0,1.0,1.0)-v).norm(),3); };
+  auto solf_grad = [](Eigen::Vector3d v) { return (Eigen::Vector3d(1.0,1.0,1.0)-v) / pow( (Eigen::Vector3d(1.0,1.0,1.0)-v).norm() , 3); };
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
@@ -55,8 +55,16 @@ int main(int argc, char *argv[]){
 
   for (int i = 0; i < nquery; i++) {
     sol[i] = solf(P.row(i));
-    sol_grad.row(i) = solf_grad(P.row(i));
+    Eigen::Vector3d tmpg = solf_grad(P.row(i));
+    if (i == 0) std::cout << P.row(i) << ", " << tmpg << std::endl;
+    if (!(std::isfinite(tmpg[0])&&std::isfinite(tmpg[1])&&std::isfinite(tmpg[2]))) {
+      sol_grad.row(i) = U_grad.row(i);
+    } else {
+      sol_grad.row(i) = tmpg;
+    }
   }
+  std::cout << "sol grad:" << sol_grad.block(0,0,20,3) << std::endl;
+  std::cout << "Ugrad:" << U_grad.block(0,0,20,3) << std::endl;
 
   std::cout << "grad error: " << (sol_grad-U_grad).mean() << std::endl;
 
