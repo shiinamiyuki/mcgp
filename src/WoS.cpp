@@ -41,6 +41,8 @@ Eigen::Vector3d uniform_ball_sampling() {
   return uniform_sphere_sampling() * sqrt(random(0, 1));
 }
 double sphere_volume(double R) { return 4.0 / 3.0 * igl::PI * R * R * R; }
+
+
 // single point estimator for ∆u = f
 std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     const igl::AABB<Eigen::MatrixXd, 3> & aabb, 
@@ -49,7 +51,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.001;
-  const int nWalks = 128;
+  const int nWalks = 512;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -131,6 +133,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
   }
   return std::make_pair(sum / nWalks, sumgrad / nWalks);
 }
+
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      const std::function<double(const Eigen::Vector3d)> &f,
@@ -151,6 +154,7 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
     U_grad.row(i) = grad;
   });
 }
+
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      Eigen::VectorXd &U) {

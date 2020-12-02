@@ -54,3 +54,8 @@ inline void walk_on_spheres(
   walk_on_spheres(V,F,B,P,f, U, U_grad);
 }
 
+void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
+                     const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
+                     const std::function<double(const Eigen::Vector3d)> &f,
+                     Eigen::VectorXd &U,
+                     Eigen::MatrixXd &U_grad);

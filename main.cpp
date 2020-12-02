@@ -25,8 +25,9 @@ int main(int argc, char *argv[]){
   std::cout << nV << std::endl;
   std::cout << V.mean() << std::endl;
   Eigen::VectorXd B(nV);
-  auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2] + sin(v[2])); }; // x^2 - y^2 + z
+  // auto solf = [](Eigen::Vector3d v) { return (v[0]*v[0] - v[1]*v[1] + v[2] + sin(v[2])); }; // x^2 - y^2 + z
   // auto solf = [](Eigen::Vector3d v) { return sin(igl::PI * v[1]) * cos(igl::PI * v[0]);};
+  auto solf = [](Eigen::Vector3d v) { return log((Eigen::Vector3d(3.0,3.0,3.0)-v).norm()); }; // x^2 - y^2 + z
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]){
 
   int w = 64, h = 64;
   int nquery = w * h;
-  Eigen::MatrixXd P(nquery, 3);
+  Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3);
   Eigen::VectorXd U(nquery), sol(nquery);
   // P << 0., 0., 0.;
   //     //  0.05,0.06,0.07,
@@ -48,7 +49,8 @@ int main(int argc, char *argv[]){
   // walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double {
   //   return -2 * igl::PI * igl::PI * sin(igl::PI * v[1]) * cos(igl::PI * v[0]);
   //  }, U);
-  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return -sin(v[2]); },U);
+  // walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return -sin(v[2]); }, U, U_grad);
+  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, U, U_grad);
 
   for (int i = 0; i < nquery; i++) {
     sol[i] = solf(P.row(i));
