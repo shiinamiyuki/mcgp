@@ -49,7 +49,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.001;
-  const int nWalks = 32;
+  const int nWalks = 128;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -139,6 +139,7 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
   igl::AABB<Eigen::MatrixXd, 3> aabb;
   aabb.init(V, F);
   U.resize(P.rows());
+  U_grad.resize(P.rows(),3);
   Eigen::MatrixXf Vf = V.cast<float>();
   igl::embree::EmbreeIntersector ei;
   ei.init(Vf, F);
@@ -146,6 +147,8 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
     double u;
     Eigen::Vector3d grad;
     std::tie(u, grad) = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i));
+    U[i] = u;
+    U_grad.row(i) = grad;
   });
 }
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
