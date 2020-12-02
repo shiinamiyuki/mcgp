@@ -49,9 +49,9 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     igl::embree::EmbreeIntersector * ei, const Eigen::MatrixXd &V,
     const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
     const std::function<double(const Eigen::Vector3d)> &f,
-    const Eigen::Vector3d &P) {
+    const Eigen::Vector3d &P,int num_walks) {
   const double eps = 0.001;
-  const int nWalks = 100;
+  const int nWalks = num_walks;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -137,6 +137,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      const std::function<double(const Eigen::Vector3d)> &f,
+                     int num_walks,
                      Eigen::VectorXd &U,
                      Eigen::MatrixXd &U_grad) {
   igl::AABB<Eigen::MatrixXd, 3> aabb;
@@ -149,16 +150,16 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
   igl::parallel_for(P.rows(), [&](int i){
     double u;
     Eigen::Vector3d grad;
-    std::tie(u, grad) = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i));
+    std::tie(u, grad) = walk_on_spheres_single_point(aabb, &ei, V, F, B, f, P.row(i), num_walks);
     U[i] = u;
     U_grad.row(i) = grad;
   });
 }
 
-void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
-                     const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
-                     Eigen::VectorXd &U) {
-  Eigen::MatrixXd U_grad;
-  return walk_on_spheres(
-      V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U, U_grad);
-}
+// void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
+//                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
+//                      Eigen::VectorXd &U) {
+//   Eigen::MatrixXd U_grad;
+//   return walk_on_spheres(
+//       V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U, U_grad);
+// }

@@ -6,7 +6,7 @@
 #include <iostream>
 #include "WoS.h"
 // #include <igl/opengl/glfw/Viewer.h>
-
+int wpp = 16;
 void test_lapint(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   int nV = V.rows();
   std::cout << nV << std::endl;
@@ -32,7 +32,7 @@ void test_lapint(Eigen::MatrixXd V, Eigen::MatrixXi F) {
     }
   }
   
-  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, U, U_grad);
+  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, wpp, U, U_grad);
 
   for (int i = 0; i < nquery; i++) {
     sol[i] = solf(P.row(i));
@@ -77,15 +77,15 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   int nquery = 1;
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery,3);
   Eigen::VectorXd U(nquery), sol(nquery);
-  P << 0.2,0.1,0.3;
+  P << 0.8,0.1,0.3;
 
 
-  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, U, U_grad);
-  double tmp=std::pow((Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d::Zero()).norm(),3);
-std::cout << "sol grad22:" << tmp << std::endl;
-std::cout << "sol grad22:" <<(Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d::Zero())/tmp<< std::endl;
-  Eigen::Vector3d tmpp=solf_grad(P.row(0));
-  std::cout << "sol grad:" << tmpp << std::endl;
+  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, wpp, U, U_grad);
+  // double tmp=std::pow((Eigen::Vector3d(1.0,1.0,1.0)-P.row(0)).norm(),3);
+  // std::cout << "sol grad22:" << tmp << std::endl;
+  // std::cout << "sol grad22:" <<(Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d(P.row(0)))/tmp<< std::endl;
+  // Eigen::Vector3d tmpp=solf_grad(P.row(0));
+  std::cout << "sol grad:" << solf_grad(P.row(0)) << std::endl;
   std::cout << "Ugrad:" << U_grad.row(0) << std::endl;
 
   // std::cout << "grad error: " << std::abs(sol_grad-U_grad) << std::endl;
@@ -97,6 +97,7 @@ int main(int argc, char *argv[]){
   Eigen::MatrixXi F;
   igl::read_triangle_mesh(
     (argc>1?argv[1]:"../data/icosphere.obj"),V,F);
+  wpp = argc > 2 ? std::stoi(argv[2]) : wpp;
   // test_lapint(V,F);
   test_lapintgrad(V,F);
 
