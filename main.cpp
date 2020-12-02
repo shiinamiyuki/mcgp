@@ -67,9 +67,10 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   std::cout << nV << std::endl;
   std::cout << V.mean() << std::endl;
   Eigen::VectorXd B(nV);
-
-  auto solf = [](Eigen::Vector3d v) { return 1/(Eigen::Vector3d(1.0, 1.0, 1.0)-v).norm(); }; 
-  auto solf_grad = [](Eigen::Vector3d v) { return (Eigen::Vector3d(1.0, 1.0, 1.0)-v) / std::pow( (Eigen::Vector3d(1.0,1.0,1.0)-v).norm() , 3); };
+  
+  Eigen::Vector3d one(1.0,1.0,1.0);
+  auto solf = [one](Eigen::Vector3d v) { return 1/(one-v).norm(); }; 
+  auto solf_grad = [one](Eigen::Vector3d v) { return (one-v) / std::pow( (one-v).norm() , 3); };
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
@@ -77,16 +78,23 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   int nquery = 1;
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery,3);
   Eigen::VectorXd U(nquery), sol(nquery);
-  P << 0.8,0.1,0.3;
+  P << 0.4,0.1,0.3;
 
+  double var=0;
+  // for (int i = 0; i < 100; ;) {}
 
   walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, wpp, U, U_grad);
   // double tmp=std::pow((Eigen::Vector3d(1.0,1.0,1.0)-P.row(0)).norm(),3);
   // std::cout << "sol grad22:" << tmp << std::endl;
   // std::cout << "sol grad22:" <<(Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d(P.row(0)))/tmp<< std::endl;
   // Eigen::Vector3d tmpp=solf_grad(P.row(0));
-  std::cout << "sol grad:" << solf_grad(P.row(0)) << std::endl;
-  std::cout << "Ugrad:" << U_grad.row(0) << std::endl;
+  Eigen::Vector3d truegrad = solf_grad(P.row(0));
+  Eigen::Vector3d approxgrad = U_grad.row(0);
+  double mse = (truegrad-approxgrad).array().pow(2).mean();
+  std::cout << "sol grad:" << truegrad << std::endl;
+  std::cout << "Ugrad:" << approxgrad << std::endl;
+  std::cout << "mse: " << mse << std::endl;
+
 
   // std::cout << "grad error: " << std::abs(sol_grad-U_grad) << std::endl;
 
