@@ -49,7 +49,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     const std::function<double(const Eigen::Vector3d)> &f,
     const Eigen::Vector3d &P) {
   const double eps = 0.001;
-  const int nWalks = 128;
+  const int nWalks = 32;
   const int maxSteps = 32;
 
   double sum = 0;
@@ -151,7 +151,7 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
 void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      const Eigen::VectorXd &B, const Eigen::MatrixXd &P,
                      Eigen::VectorXd &U) {
-                         Eigen::MatrixXd U_grad;
+  Eigen::MatrixXd U_grad;
   return walk_on_spheres(
       V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U, U_grad);
 }

@@ -39,10 +39,10 @@ int main(int argc, char *argv[]){
   // P << 0., 0., 0.;
   //     //  0.05,0.06,0.07,
   //     //  -0.1,-0.02,0.05;
-  for(int x = 0; x < w;x++){
-    for(int y = 0; y < h;y++){
+  for(int x = 0; x < w; x++){
+    for(int y = 0; y < h; y++){
       int i = x + y * w;
-      P.row(i) = Eigen::Vector3d(2 * (double(x) / w ) - 1, 2 * (double(y) / h ) - 1,0.0);
+      P.row(i) = Eigen::Vector3d(2*(double(x)/w)-1, 2*(double(y)/h)-1, 0.0);
     }
   }
   // walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double {
