@@ -94,7 +94,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
       u += k * f(y) * lapg3d(r, R) * sphere_volume(R);
 
       if (steps == 0) {
-        first_direction = new_direction;
+        first_direction = new_direction.normalized();
         first_R = R;
         grad = sphere_volume(R) * f(y) * lapdg3d(x,y,R);
       }
@@ -129,6 +129,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
     if(!std::isnan(u)) {
       sum += u;
       sumgrad += u*first_direction*3/first_R + grad;
+      // std::cout << grad << std::endl;
     }
   }
   return std::make_pair(sum / nWalks, sumgrad / nWalks);

@@ -69,8 +69,9 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   Eigen::VectorXd B(nV);
   
   Eigen::Vector3d one(1.0,1.0,1.0);
-  auto solf = [one](Eigen::Vector3d v) { return 1/(one-v).norm(); }; 
-  auto solf_grad = [one](Eigen::Vector3d v) { return (one-v) / std::pow( (one-v).norm() , 3); };
+  // auto solf = [one](Eigen::Vector3d v) { return 1/(one-v).norm(); }; 
+  auto solf = [](Eigen::Vector3d v) { return v[0]+v[1]+v[2]; }; 
+  auto solf_grad = [one](Eigen::Vector3d v) { return one; };
   for (int i = 0; i < nV; i++) {
     B[i] = solf(V.row(i));
   }
@@ -80,23 +81,34 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   Eigen::VectorXd U(nquery), sol(nquery);
   P << 0.4,0.1,0.3;
 
-  double var=0;
-  // for (int i = 0; i < 100; ;) {}
+  Eigen::Vector3d approxmean = Eigen::Vector3d::Zero();
+  int ntrial = 200;
+  Eigen::VectorXd all_approxU(ntrial);
+  Eigen::MatrixXd all_approxgrad(ntrial,3);
+  for (int i = 0; i < ntrial; i++) {
 
-  walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, wpp, U, U_grad);
-  // double tmp=std::pow((Eigen::Vector3d(1.0,1.0,1.0)-P.row(0)).norm(),3);
-  // std::cout << "sol grad22:" << tmp << std::endl;
-  // std::cout << "sol grad22:" <<(Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d(P.row(0)))/tmp<< std::endl;
-  // Eigen::Vector3d tmpp=solf_grad(P.row(0));
-  Eigen::Vector3d truegrad = solf_grad(P.row(0));
-  Eigen::Vector3d approxgrad = U_grad.row(0);
-  double mse = (truegrad-approxgrad).array().pow(2).mean();
-  std::cout << "sol grad:" << truegrad << std::endl;
-  std::cout << "Ugrad:" << approxgrad << std::endl;
-  std::cout << "mse: " << mse << std::endl;
+    walk_on_spheres(V, F, B, P, [](Eigen::Vector3d v)->double { return 0.0; }, wpp, U, U_grad);
+    // double tmp=std::pow((Eigen::Vector3d(1.0,1.0,1.0)-P.row(0)).norm(),3);
+    // std::cout << "sol grad22:" << tmp << std::endl;
+    // std::cout << "sol grad22:" <<(Eigen::Vector3d(1.0,1.0,1.0)-Eigen::Vector3d(P.row(0)))/tmp<< std::endl;
+    // Eigen::Vector3d tmpp=solf_grad(P.row(0));
+    Eigen::Vector3d truegrad = solf_grad(P.row(0));
+    Eigen::Vector3d approxgrad = U_grad.row(0);
+    double mse = (truegrad-approxgrad).array().pow(2).mean();
+    // std::cout << "sol grad:" << truegrad << std::endl;
+    // std::cout << "Ugrad:" << approxgrad << std::endl;
+    // std::cout << "mse: " << mse << std::endl;
+    approxmean += approxgrad;
+    all_approxgrad.row(i) = approxgrad;
+    all_approxU[i]=U[0];
+  }
 
+  std::cout << "func value mean: " << all_approxU.mean() << std::endl;
+  std::cout << "grad mean: " << all_approxgrad.colwise().mean() << std::endl;
+  // approx.rowwise() -= approxmean;
+  // Eigen::Vector3d approxvar = approx.colwise().mean();
+  // std::cout << "var: " << approxvar/(ntrial-1) << std::endl;
 
-  // std::cout << "grad error: " << std::abs(sol_grad-U_grad) << std::endl;
 
 }
 
