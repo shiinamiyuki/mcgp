@@ -79,10 +79,10 @@ void test_lapintgrad(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   int nquery = 1;
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery,3);
   Eigen::VectorXd U(nquery), sol(nquery);
-  P << 0.4,0.1,0.3;
+  P << 0.2,0.3,0.1;
 
   Eigen::Vector3d approxmean = Eigen::Vector3d::Zero();
-  int ntrial = 200;
+  int ntrial = 50;
   Eigen::VectorXd all_approxU(ntrial);
   Eigen::MatrixXd all_approxgrad(ntrial,3);
   for (int i = 0; i < ntrial; i++) {

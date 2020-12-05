@@ -94,7 +94,7 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
       u += k * f(y) * lapg3d(r, R) * sphere_volume(R);
 
       if (steps == 0) {
-        first_direction = new_direction.normalized();
+        first_direction = new_direction.normalized(); //the normalize is unnecessary since the direction is always normalized.
         first_R = R;
         grad = sphere_volume(R) * f(y) * lapdg3d(x,y,R);
       }
@@ -127,6 +127,10 @@ std::pair<double, Eigen::Vector3d> walk_on_spheres_single_point(
       u += k * bc * gx;
     }
     if(!std::isnan(u)) {
+      // if (j!=0) 
+      //   sum += u - sumgrad.dot(first_direction*first_R)/j;
+      // else
+      //   sum += u;
       sum += u;
       sumgrad += u*first_direction*3/first_R + grad;
       // std::cout << grad << std::endl;
@@ -164,3 +168,4 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
 //   return walk_on_spheres(
 //       V, F, B, P, [](const Eigen::Vector3d &x) { return 0.0; }, U, U_grad);
 // }
+
