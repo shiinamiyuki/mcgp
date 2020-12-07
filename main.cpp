@@ -11,12 +11,28 @@
 
 void test_poi2d() {
   auto sdf = [](Eigen::Vector2d p) { return sqrt(pow(p[0],2) + pow(p[1],2)) - 1; };
-  auto bc = [](Eigen::Vector2d p) { return cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
-  auto sdfbc = sdf_bc(sdf, bc);
-  double sd,bcval;
-  Eigen::Vector2d p(2,2);
-  std::tie(sd,bcval) = sdfbc(p);
-  std::cout << sd << " " << bcval << std::endl;
+  auto sol = [](Eigen::Vector2d p) { return cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
+  auto solgrad = [](Eigen::Vector2d p)->Eigen::Vector2d { 
+    return Eigen::Vector2d(-2*igl::PI*sin(2*igl::PI*p[0])*sin(2*igl::PI*p[1]),
+            2*igl::PI*cos(2*igl::PI*p[0])*cos(2*igl::PI*p[1])); 
+  };
+  auto f = [](Eigen::Vector2d p) { return 8*pow(igl::PI,2)*cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
+  auto sdfbc = sdf_bc(sdf, sol);
+  // double sd, bcval;
+  // Eigen::Vector2d p(2,2);
+  // std::tie(sd,bcval) = sdfbc(p);
+  // std::cout << sd << " " << bcval << std::endl;
+
+
+  Eigen::MatrixXd P(1,2),U_grad;
+  Eigen::VectorXd U;
+  P << -0.2,0.4;
+
+  walk_on_spheres2d(sdfbc,f,P,100000,U,U_grad);
+  std::cout << "approx val:" << U << std::endl;
+  std::cout << "approx grad:" << U_grad << std::endl;
+  std::cout << "real val:" << sol(P.row(0)) << std::endl;
+  std::cout << "real grad:" << solgrad(P.row(0)) << std::endl;
 }
 
 int wpp = 16;
