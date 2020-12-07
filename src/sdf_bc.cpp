@@ -21,11 +21,11 @@ std::function<std::pair<double,double>(const Eigen::Vector2d)> sdf_bc(
     return p - sdf(p) * Eigen::Vector2d(sdfgradx(p), sdfgrady(p)) / sdfgrad2(p);
   };
 
-  Eigen::Vector2d x(2,2);
-  Eigen::Vector2d y(sqrt(2)/2,sqrt(2)/2);
-  std::cout << closest(x) << std::endl;
-  std::cout << "bc(closest(x))=" << bc(closest(x)) << std::endl;
-  std::cout << "bc(y)=" <<  bc(y) << std::endl;
+  // Eigen::Vector2d x(2,2);
+  // Eigen::Vector2d y(sqrt(2)/2,sqrt(2)/2);
+  // std::cout << closest(x) << std::endl;
+  // std::cout << "bc(closest(x))=" << bc(closest(x)) << std::endl;
+  // std::cout << "bc(y)=" <<  bc(y) << std::endl;
 
   return [=](Eigen::Vector2d p) {
     // std::cout << p << std::endl;

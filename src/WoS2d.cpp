@@ -49,7 +49,7 @@ std::pair<double, Eigen::Vector2d> walk_on_spheres2d_single_point(
 
     for (int k = 0; k < maxSteps; k++) {
       double sd, bc;
-      std::tie(sd, bc) = sdf_bc(P);
+      std::tie(sd, bc) = sdf_bc(curp);
       double R = std::abs(sd);
 
       Eigen::Vector2d newdir = uniform_circle_sampling() * R;
