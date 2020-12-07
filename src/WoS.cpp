@@ -123,3 +123,31 @@ void walk_on_spheres3d(const std::function<std::pair<double, double>(const Eigen
     U_grad.row(i) = grad;
   });
 }
+
+void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
+                     const Eigen::MatrixXd &P, const std::function<double(const Eigen::Vector3d)> &f, int num_walks,
+                     Eigen::VectorXd &U, Eigen::MatrixXd &U_grad) {
+  igl::embree::EmbreeIntersector ei;
+  ei.init(V.cast<float>(), F);
+  auto sdf_bc = [&](const Eigen::Vector3d &p) -> std::pair<double, double> {
+    int closest_face;
+    float distance;
+    ei.distance(p.cast<float>(), distance, closest_face);
+    double bc;
+    {
+      std::array<Eigen::RowVector3d, 3> triangle;
+      triangle[0] = V.row(F(closest_face, 0));
+      triangle[1] = V.row(F(closest_face, 1));
+      triangle[2] = V.row(F(closest_face, 2));
+      Eigen::RowVector3d uv;
+      igl::barycentric_coordinates(Eigen::RowVector3d(p), triangle[0], triangle[1], triangle[2], uv);
+      Eigen::Vector3d gx;
+      gx[0] = B[F(closest_face, 0)];
+      gx[1] = B[F(closest_face, 1)];
+      gx[2] = B[F(closest_face, 2)];
+      bc = uv.dot(gx);
+    }
+    return std::make_pair(double(distance), bc);
+  };
+  walk_on_spheres3d(sdf_bc, P, f, num_walks, U, U_grad);
+}
