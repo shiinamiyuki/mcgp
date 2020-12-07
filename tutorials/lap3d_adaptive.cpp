@@ -15,7 +15,8 @@ int main() {
   constexpr int wpp = 160;
   constexpr size_t total = w * h * wpp;
   walk_on_spheres3d_region(
-    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, total, point_cloud);
+    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, 4096, total,
+    point_cloud);
 
   int nquery = w * h;
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);

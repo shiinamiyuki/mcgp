@@ -152,7 +152,7 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
           u = u - oldgrad.dot(first_R * first_direction);
           grad = (u - oldsum / j) * first_direction * 3 / first_R + grad;
         } else {
-          grad = u * first_direction * 3 / first_R + grad;
+          grad = (u * first_direction * 3 / first_R + grad);
         }
 
         if (std::isfinite(u)) {
@@ -211,7 +211,7 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
     }
   }
   WoSEstimator es;
-  es.grad = sumgrad / nWalks;
+  es.grad = 2.0 * sumgrad / nWalks;
   es.u = sum / nWalks;
   es.u_var = u_var.variance();
   return es;
@@ -272,18 +272,23 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const E
 void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
                               const std::function<double(const Eigen::Vector3d)> &f,
                               const std::function<Eigen::Vector3d(Eigen::Vector3d)> &region,
-                              const Eigen::Vector3d &center, double Rmax, size_t total_walks,
+                              const Eigen::Vector3d &center, double Rmax, size_t walks_per_point, size_t total_walks,
                               WoSPointCloud &point_cloud) {
   point_cloud.resize(0);
-  const int walks_per_candidate = 1024;
+  const int walks_per_candidate = walks_per_point;
   size_t accumluate_walks = 0;
-
-  while (accumluate_walks < total_walks) {
+  int consecutive_zeros = 0;
+  int max_iter = 4 * (total_walks / walks_per_candidate / 1024) + 1;
+  int iter = 0;
+  while (accumluate_walks < total_walks && iter < max_iter) {
+    iter++;
+    if (consecutive_zeros >= 16)
+      break;
     std::vector<std::vector<int>> O_PI;
     Eigen::MatrixXi O_CH;
     Eigen::MatrixXd O_CN;
     Eigen::VectorXd O_W;
-    size_t n_max_candidate = std::min<size_t>(128, (total_walks - accumluate_walks) / walks_per_candidate);
+    size_t n_max_candidate = std::min<size_t>(1024, (total_walks - accumluate_walks) / walks_per_candidate);
     Eigen::MatrixXd P(n_max_candidate, 3);
     std::vector<Eigen::Vector3d> candidates;
     for (size_t i = 0; i < n_max_candidate; i++) {
@@ -324,6 +329,12 @@ void walk_on_spheres3d_region(const std::function<std::pair<double, double>(cons
       }
     }
     std::cout << "candidates: " << candidates.size() << std::endl;
+    if (candidates.empty()) {
+      consecutive_zeros++;
+      continue;
+    } else {
+      consecutive_zeros = 0;
+    }
     P.resize(candidates.size(), 3);
     // std::cout << P << std::endl;
     Eigen::MatrixXd U_grad;
