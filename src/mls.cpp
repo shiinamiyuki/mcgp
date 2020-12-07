@@ -53,7 +53,7 @@ double moving_least_squares<2>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     return b;
   };
   auto theta = [](double d) {
-    const auto eps = 0.01;
+    const auto eps = 1e-9;
     return 1.0 / (d * d + eps * eps);
   };
   Eigen::Matrix<double, nBasis, nBasis> A;
