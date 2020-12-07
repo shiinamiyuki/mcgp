@@ -20,3 +20,12 @@ Eigen::Vector3d lapdg3d(
   Eigen::Vector3d & x, 
   Eigen::Vector3d & y, 
   double R);
+
+double lapg2d(
+  double r,
+  double R);
+
+Eigen::Vector2d lapdg2d(
+  Eigen::Vector2d & x, 
+  Eigen::Vector2d & y, 
+  double R);

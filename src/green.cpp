@@ -31,3 +31,26 @@ Eigen::Vector3d lapdg3d(
   }
   return dg;
 }
+
+double lapg2d(
+  double r,
+  double R) 
+{
+  double g = std::log(R/r)/(2*igl::PI);
+  if (!std::isfinite(g)) {
+    g = 0;
+  }
+  return g;
+}
+Eigen::Vector2d lapdg2d(
+  Eigen::Vector2d & x, 
+  Eigen::Vector2d & y, 
+  double R)
+{
+  double r = (x-y).norm();
+  Eigen::Vector2d dg = (y-x)*(1/pow(r,2) - 1/pow(R,2))/(2*igl::PI);
+  if(!std::isfinite(dg[0]) || !std::isfinite(dg[1])){
+    return Eigen::Vector2d::Zero();
+  }
+  return dg;
+}
