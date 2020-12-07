@@ -10,9 +10,9 @@ void helm3d(
   const std::function<Eigen::Vector3d(Eigen::Vector3d)> curlX,
   const Eigen::MatrixXd &P,
   const int nWalks,
-  Eigen::MatrixXd gradu,
-  Eigen::MatrixXd curlA,
-  Eigen::MatrixXd Y) 
+  Eigen::MatrixXd &gradu,
+  Eigen::MatrixXd &curlA,
+  Eigen::MatrixXd &Y) 
 {
   
   auto bc = [](Eigen::Vector3d p) -> double { return 0.0; };
@@ -23,11 +23,12 @@ void helm3d(
   Eigen::MatrixXd gradA0, gradA1, gradA2;
 
   gradu.resize(P.rows(), 3);
-  walk_on_spheres3d(sdfbc,P,divX,center,Rmax,nWalks,u,gradu);
+  walk_on_spheres3d(sdfbc,P,[=](Eigen::Vector3d p){ return -divX(p); },center,Rmax,nWalks,u,gradu);
+  // std::cout << gradu << std::endl;
 
-  auto curlX0 = [=](Eigen::Vector3d p) -> double { return curlX(p)[0]; };
-  auto curlX1 = [=](Eigen::Vector3d p) -> double { return curlX(p)[1]; };
-  auto curlX2 = [=](Eigen::Vector3d p) -> double { return curlX(p)[2]; };
+  auto curlX0 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[0]; };
+  auto curlX1 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[1]; };
+  auto curlX2 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[2]; };
 
 
   walk_on_spheres3d(sdfbc,P,curlX0,center,Rmax,nWalks,A0,gradA0);
