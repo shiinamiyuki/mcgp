@@ -27,3 +27,6 @@ target_link_libraries(mcgp core igl::core igl::opengl igl::opengl_glfw igl::png)
 
 add_executable(mcgp3d "main3d.cpp")
 target_link_libraries(mcgp3d core igl::core igl::opengl igl::opengl_glfw igl::png)
+
+add_executable(mcgp_helm "mainhelm.cpp")
+target_link_libraries(mcgp_helm core igl::core igl::opengl igl::opengl_glfw igl::png)
