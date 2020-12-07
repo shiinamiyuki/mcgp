@@ -40,6 +40,41 @@ Eigen::Vector3d uniform_sphere_sampling() {
 // }
 double sphere_volume(double R) { return 4.0 / 3.0 * igl::PI * R * R * R; }
 
+std::pair<Eigen::Vector3d, double> importance_sample_green3d(double R) {
+  const double intG = R * R / 6.0;
+  Eigen::Vector3d y = uniform_sphere_sampling();
+  // double theta = acos(y.z());
+  // sample r prop. to r * r* sin(theta)
+  // r' = r / R
+  //  r * r* sin(theta) = R^2 * r' * sin(theta)
+  // cdf(r') = integrate R^2 * r' * sin(theta) [0, r'] / intCDF
+  //         = R^2 *  sin(theta) * r'^3 / 3 / intCDF
+  // R^2 *  sin(theta) * r'^3 / 3 / intCDF= u
+  // cdf^{-1}(u) = (intCDF * 3 * u / sin(theta) /  R^2)^(-1/3)
+  // const auto intCDF = R * R / 3 * sin(theta);
+  // auto u = random(0, 1);
+  // double r;
+  // if (theta == 0) {
+  //   r = u;
+  // } else {
+  //   r = pow(intCDF * 3 * u / sin(theta) / (R * R), -1.0 / 3.0);
+  // }
+  // r *= R;
+  // int r^2*sin(theta)*G = sin(theta) / (4*pi * r * R) * (r*r*R/2.0 - r*r*r/3.0)
+  // const auto F = [=](double r) { return sin(theta) / (4 * igl::PI * r * R) * (r * r * R / 2.0 - r * r * r / 3.0); };
+  // const auto CDF = [=](double r) { return F(r) / F(R); };
+  // const auto invCDF = [=](double u){
+  // u = sin(theta) / (4 * igl::PI * r * R) * (r * r * R / 2.0 - r * r * r / 3.0) / intCDF
+  // u* intCDF / sin(theta) = 1.0 / (4 * igl::PI * r * R) * (r * r * R / 2.0 - r * r * r / 3.0)
+  // };
+  const auto r = pow(random(0, 1), 1.0 / 3.0) * R;
+  return std::pair<Eigen::Vector3d, double>(y * r, r);
+}
+double pdf_green3d(double r, double R) {
+  const double intG = R * R / 6.0;
+  return lapg3d(r, R) / intG;
+}
+
 // single point estimator for ∆u = f
 std::pair<double, Eigen::Vector3d>
 walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
@@ -70,8 +105,15 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
       double R = std::abs(sd);
       if (R < eps) {
         u += bc;
-        sum += u;
-        sumgrad += u * first_direction * 3 / first_R + grad;
+        if (j != 0) {
+          double oldsum = sum;
+          Eigen::Vector3d oldgrad = sumgrad / j;
+          sum += u - oldgrad.dot(first_R * first_direction);
+          sumgrad += (u - oldsum / j) * first_direction * 3 / first_R + grad;
+        } else {
+          sum += u;
+          sumgrad += u * first_direction * 3 / first_R + grad;
+        }
         break;
       }
       if (steps < maxSteps) {
@@ -82,14 +124,24 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
 
       Eigen::Vector3d x_k1 = x + new_direction * R;
 
-      double r = pow(random(0, 1), 1.0 / 3.0) * R;
-      Eigen::Vector3d y = x + uniform_sphere_sampling() * r;
-      u += k * f(y) * lapg3d(r, R) * sphere_volume(R);
+      {
+        double r = pow(random(0, 1), 1.0 / 3.0) * R;
+        // Eigen::Vector3d y;
+        Eigen::Vector3d y = x + uniform_sphere_sampling() * r;
+        u += k * f(y) * lapg3d(r, R) * sphere_volume(R);
+        // std::tie(y, r) = importance_sample_green3d(R);
+        // y = x + y;
+        // u += k * f(y) * lapg3d(r, R) / pdf_green3d(r, R);
+        // printf("%lf\n", lapg3d(r, R) / pdf_green3d(r, R));
+      }
 
       if (steps == 0) {
         first_direction =
-          new_direction.normalized(); // the normalize is unnecessary since the direction is always normalized.
+          new_direction
+            .normalized(); // the normalize is unnecessary since the direction is always normalized.; yes, it is.
         first_R = R;
+        double r = pow(random(0, 1), 1.0 / 3.0) * R;
+        Eigen::Vector3d y = x + uniform_sphere_sampling() * r;
         grad = sphere_volume(R) * f(y) * lapdg3d(x, y, R);
       }
 

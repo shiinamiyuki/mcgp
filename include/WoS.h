@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <functional>
 #include <igl/embree/EmbreeIntersector.h>
-// Solve ∆u = f over space at given poinst P subject to B on the given boundary
+// Solve ∆u = -f over space at given poinst P subject to B on the given boundary
 // mesh (V,F)
 //
 // Inputs:
@@ -24,7 +24,7 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      Eigen::MatrixXd &U_grad);
 
 
-// Solve ∆u = f over space at given poinst P subject to B on the boundary given by implicit surface
+// Solve ∆u = -f over space at given poinst P subject to B on the boundary given by implicit surface
 //
 // Inputs:
 //   sdf_bc R^3 -> pair<signed distance, boundary condition
