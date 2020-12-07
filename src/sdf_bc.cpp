@@ -17,7 +17,7 @@ std::function<std::pair<double,double>(const Eigen::Vector2d)> sdf_bc(
   auto sdfgrad2 = [=](Eigen::Vector2d p) {
     return pow(sdfgradx(p),2) + pow(sdfgrady(p),2);
   };
-  auto closest = [=](Eigen::Vector2d p) {
+  auto closest = [=](Eigen::Vector2d p)-> Eigen::Vector2d {
     return p - sdf(p) * Eigen::Vector2d(sdfgradx(p), sdfgrady(p)) / sdfgrad2(p);
   };
 
@@ -28,6 +28,8 @@ std::function<std::pair<double,double>(const Eigen::Vector2d)> sdf_bc(
   std::cout << "bc(y)=" <<  bc(y) << std::endl;
 
   return [=](Eigen::Vector2d p) {
+    // std::cout << p << std::endl;
+    // std::cout << "bc(closest(p))=" << bc(closest(p)) << std::endl;
     return std::make_pair(sdf(p), bc(closest(p)));
   };
 }

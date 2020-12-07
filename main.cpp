@@ -16,7 +16,7 @@ void test_poi2d() {
   double sd,bcval;
   Eigen::Vector2d p(2,2);
   std::tie(sd,bcval) = sdfbc(p);
-  std::cout << sd << " " << bc << std::endl;
+  std::cout << sd << " " << bcval << std::endl;
 }
 
 int wpp = 16;
