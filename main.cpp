@@ -14,9 +14,9 @@ void test_poi2d() {
   auto bc = [](Eigen::Vector2d p) { return cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
   auto sdfbc = sdf_bc(sdf, bc);
   double sd,bcval;
-  Eigen::Vector2d p(3,0);
-  auto tmp = sdfbc(p);
-  std::cout << tmp.first << " " << tmp.second << std::endl;
+  Eigen::Vector2d p(2,2);
+  std::tie(sd,bcval) = sdfbc(p);
+  std::cout << sd << " " << bc << std::endl;
 }
 
 int wpp = 16;
