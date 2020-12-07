@@ -3,6 +3,9 @@
 #include <igl/barycentric_coordinates.h>
 #include <igl/barycentric_interpolation.h>
 #include <igl/point_mesh_squared_distance.h>
+#include <igl/centroid.h>
+#include <igl/octree.h>
+#include <igl/knn.h>
 #include <limits>
 #include <igl/parallel_for.h>
 #include <random>
@@ -11,6 +14,7 @@
 #include <cmath>
 #include <green.h>
 #include <WoS.h>
+#include <mls.h>
 
 // returns a random value in the range [rMin,rMax]
 static thread_local std::random_device rd;
@@ -75,15 +79,51 @@ double pdf_green3d(double r, double R) {
   return lapg3d(r, R) / intG;
 }
 
+template <class T>
+struct VarianceTracker {
+  double mean, m2;
+  int count = 0;
+  void update(T value) {
+    if (count == 0) {
+      mean = value;
+      m2 = T(0.0);
+    } else {
+      auto delta = value - mean;
+      mean += delta / T(count + 1);
+      m2 += delta * (value - mean);
+    }
+    count++;
+  }
+  T variance() const {
+    if (count < 2) {
+      return T(-1.0);
+    }
+    return m2;
+  }
+  T mean_variance() const {
+    if (count < 2) {
+      return T(-1.0);
+    }
+    return m2 / T(count * count);
+  }
+};
+
+struct WoSEstimator {
+  double u_var;
+  // VarianceTracker<Eigen::Vector3d> u_grad_var;
+  double u = 0.0;
+  Eigen::Vector3d grad;
+};
+
 // single point estimator for ∆u = f
-std::pair<double, Eigen::Vector3d>
+WoSEstimator
 walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
                               const std::function<double(const Eigen::Vector3d)> &f, const Eigen::Vector3d &P,
-                              int num_walks) {
+                              const Eigen::Vector3d &center, double Rmax, int num_walks) {
   const double eps = 0.001;
   const int nWalks = num_walks;
   const int maxSteps = 32;
-
+  VarianceTracker<double> u_var, u_grad_var;
   double sum = 0;
   Eigen::Vector3d sumgrad = Eigen::Vector3d::Zero();
 
@@ -105,15 +145,24 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
       double R = std::abs(sd);
       if (R < eps) {
         u += bc;
+
         if (j != 0) {
           double oldsum = sum;
           Eigen::Vector3d oldgrad = sumgrad / j;
-          sum += u - oldgrad.dot(first_R * first_direction);
-          sumgrad += (u - oldsum / j) * first_direction * 3 / first_R + grad;
+          u = u - oldgrad.dot(first_R * first_direction);
+          grad = (u - oldsum / j) * first_direction * 3 / first_R + grad;
         } else {
-          sum += u;
-          sumgrad += u * first_direction * 3 / first_R + grad;
+          grad = u * first_direction * 3 / first_R + grad;
         }
+
+        if (std::isfinite(u)) {
+          u_var.update(u);
+          sum += u;
+        }
+        if (std::isfinite(grad.sum())) {
+          sumgrad += grad;
+        }
+
         break;
       }
       if (steps < maxSteps) {
@@ -146,31 +195,41 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
       }
 
       x = x_k1;
-
+      if ((x - center).squaredNorm() > Rmax * Rmax) {
+        break;
+      }
       if (steps >= maxSteps) {
-        auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
-        if (std::isfinite(continue_prob) && random(0, 1) < continue_prob) {
-          k /= continue_prob;
-        } else {
-          break;
-        }
-        R_last = std::min(R_last, R);
+        break;
+        // auto continue_prob = std::fmin(1.0, R_last / R) * 0.95;
+        // if (std::isfinite(continue_prob) && random(0, 1) < continue_prob) {
+        //   k /= continue_prob;
+        // } else {
+        //   break;
+        // }
+        // R_last = std::min(R_last, R);
       }
     }
   }
-  return std::make_pair(sum / nWalks, sumgrad / nWalks);
+  WoSEstimator es;
+  es.grad = sumgrad / nWalks;
+  es.u = sum / nWalks;
+  es.u_var = u_var.variance();
+  return es;
 }
 
 void walk_on_spheres3d(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
-                       const Eigen::MatrixXd &P, const std::function<double(const Eigen::Vector3d)> &f, int num_walks,
-                       Eigen::VectorXd &U, Eigen::MatrixXd &U_grad) {
+                       const Eigen::MatrixXd &P, const std::function<double(const Eigen::Vector3d)> &f,
+                       const Eigen::Vector3d &center, double Rmax, int num_walks, Eigen::VectorXd &U,
+                       Eigen::MatrixXd &U_grad) {
   U.resize(P.rows());
   U_grad.resize(P.rows(), 3);
 
   igl::parallel_for(P.rows(), [&](int i) {
     double val;
     Eigen::Vector3d grad;
-    std::tie(val, grad) = walk_on_sphere_single_point3d(sdf_bc, f, P.row(i), num_walks);
+    auto es = walk_on_sphere_single_point3d(sdf_bc, f, P.row(i), center, Rmax, num_walks);
+    val = es.u;
+    grad = es.grad;
     U[i] = val;
     U_grad.row(i) = grad;
   });
@@ -201,5 +260,102 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const E
     }
     return std::make_pair(double(distance), bc);
   };
-  walk_on_spheres3d(sdf_bc, P, f, num_walks, U, U_grad);
+  Eigen::Vector3d center;
+  igl::centroid(V, F, center);
+  double Rmax = 0.0;
+  for (int i = 0; i < V.rows(); i++) {
+    Rmax = std::max((V.row(i).transpose() - center).norm(), Rmax);
+  }
+  walk_on_spheres3d(sdf_bc, P, f, center, Rmax * 2.0, num_walks, U, U_grad);
+}
+
+void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
+                              const std::function<double(const Eigen::Vector3d)> &f,
+                              const std::function<Eigen::Vector3d(Eigen::Vector3d)> &region,
+                              const Eigen::Vector3d &center, double Rmax, size_t total_walks,
+                              WoSPointCloud &point_cloud) {
+  point_cloud.resize(0);
+  const int walks_per_candidate = 1024;
+  size_t accumluate_walks = 0;
+
+  while (accumluate_walks < total_walks) {
+    std::vector<std::vector<int>> O_PI;
+    Eigen::MatrixXi O_CH;
+    Eigen::MatrixXd O_CN;
+    Eigen::VectorXd O_W;
+    size_t n_max_candidate = std::min<size_t>(128, (total_walks - accumluate_walks) / walks_per_candidate);
+    Eigen::MatrixXd P(n_max_candidate, 3);
+    std::vector<Eigen::Vector3d> candidates;
+    for (size_t i = 0; i < n_max_candidate; i++) {
+      Eigen::Vector3d candidate = region(Eigen::Vector3d(random(0, 1), random(0, 1), random(0, 1)));
+      P.row(i) = candidate;
+    }
+    if (point_cloud.n_points() > 16) {
+      igl::octree(point_cloud.P, O_PI, O_CH, O_CN, O_W);
+      Eigen::MatrixXi I;
+      Eigen::VectorXi neighbors;
+      std::cout << "computing knn for " << P.rows() << " points" << std::endl;
+      igl::knn(P, point_cloud.P, 8, O_PI, O_CH, O_CN, O_W, I);
+      for (int i = 0; i < P.rows(); i++) {
+        Eigen::Vector3d x = P.row(i);
+        neighbors = I.row(i);
+        auto approx = [&](int idx) {
+          return point_cloud.U[idx] + point_cloud.U_grad.row(idx).dot(x - Eigen::Vector3d(point_cloud.P.row(idx)));
+        };
+        VarianceTracker<double> u_var;
+        double u_mean = 0.0;
+        for (int ni = 0; ni < neighbors.size(); ni++) {
+          int idx = neighbors[ni];
+          auto f = approx(idx);
+          u_var.update(f);
+          u_mean += f / neighbors.size();
+        }
+        // std::cout << u_var.variance() << " " << u_mean << std::endl;
+        if (u_mean == 0.0 && u_var.variance() > 0.01) {
+          candidates.push_back(x);
+        } else if (u_var.variance() / std::abs(u_mean) > 0.01) {
+          candidates.push_back(x);
+        }
+      }
+    } else {
+      for (int i = 0; i < P.rows(); i++) {
+        Eigen::Vector3d x = P.row(i);
+        candidates.push_back(x);
+      }
+    }
+    std::cout << "candidates: " << candidates.size() << std::endl;
+    P.resize(candidates.size(), 3);
+    // std::cout << P << std::endl;
+    Eigen::MatrixXd U_grad;
+    Eigen::VectorXd U;
+    for (size_t i = 0; i < candidates.size(); i++) {
+      P.row(i) = candidates[i];
+    }
+    walk_on_spheres3d(sdf_bc, P, f, center, Rmax, walks_per_candidate, U, U_grad);
+    auto n_prev = point_cloud.n_points();
+    point_cloud.resize(point_cloud.n_points() + candidates.size());
+    for (size_t i = 0; i < candidates.size(); i++) {
+      point_cloud.P.row(n_prev + i) = P.row(i);
+      point_cloud.U_grad.row(n_prev + i) = U_grad.row(i);
+      point_cloud.U[n_prev + i] = U[i];
+    }
+    accumluate_walks += walks_per_candidate * candidates.size();
+    std::cout << "point cloud size: " << point_cloud.n_points() << std::endl;
+    // std::cout << point_cloud.U << std::endl;
+  }
+}
+
+void wos_point_cloud_interpolate(const WoSPointCloud &point_cloud, const Eigen::MatrixXd &P, Eigen::VectorXd &U,
+                                 Eigen::MatrixXd &U_grad) {
+  U.resize(P.rows());
+  U_grad.resize(P.rows(), 3);
+  Eigen::VectorXd grad_x = point_cloud.U_grad.col(0);
+  Eigen::VectorXd grad_y = point_cloud.U_grad.col(1);
+  Eigen::VectorXd grad_z = point_cloud.U_grad.col(2);
+  igl::parallel_for(P.rows(), [&](int i) {
+    U[i] = moving_least_squares(point_cloud.U, point_cloud.P, P.row(i));
+    U_grad(i, 0) = moving_least_squares(grad_x, point_cloud.P, P.row(i));
+    U_grad(i, 1) = moving_least_squares(grad_y, point_cloud.P, P.row(i));
+    U_grad(i, 2) = moving_least_squares(grad_z, point_cloud.P, P.row(i));
+  });
 }
