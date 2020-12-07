@@ -5,7 +5,20 @@
 #include <igl/PI.h>
 #include <iostream>
 #include "WoS.h"
+#include "WoS2d.h"
+#include "sdf_bc.h"
 // #include <igl/opengl/glfw/Viewer.h>
+
+void test_poi2d() {
+  auto sdf = [](Eigen::Vector2d p) { return sqrt(pow(p[0],2) + pow(p[1],2)) - 1; };
+  auto bc = [](Eigen::Vector2d p) { return cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
+  auto sdfbc = sdf_bc(sdf, bc);
+  double sd,bcval;
+  Eigen::Vector2d p(3,0);
+  auto tmp = sdfbc(p);
+  std::cout << tmp.first << " " << tmp.second << std::endl;
+}
+
 int wpp = 16;
 void test_lapint(Eigen::MatrixXd V, Eigen::MatrixXi F) {
   int nV = V.rows();
@@ -119,7 +132,8 @@ int main(int argc, char *argv[]){
     (argc>1?argv[1]:"../data/icosphere.obj"),V,F);
   wpp = argc > 2 ? std::stoi(argv[2]) : wpp;
   // test_lapint(V,F);
-  test_lapintgrad(V,F);
+  // test_lapintgrad(V,F);
+  test_poi2d();
 
 
   // igl::opengl::glfw::Viewer viewer;
