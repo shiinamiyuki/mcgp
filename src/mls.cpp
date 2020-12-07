@@ -30,7 +30,6 @@ double moving_least_squares<1>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     b += theta(x.norm()) * basis(x) * f[i];
   }
   Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  igl::pinv(A, b);
   return c[0];
 }
 
@@ -53,7 +52,7 @@ double moving_least_squares<2>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     return b;
   };
   auto theta = [](double d) {
-    const auto eps = 1e-9;
+    const auto eps = 0.0001;
     return 1.0 / (d * d + eps * eps);
   };
   Eigen::Matrix<double, nBasis, nBasis> A;
@@ -67,7 +66,6 @@ double moving_least_squares<2>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
   }
 //   std::cout << "A:\n" << A << "\nb:\n" << b << std::endl;
   Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  igl::pinv(A, b);
   return c[0];
 }
 
@@ -100,7 +98,7 @@ double moving_least_squares<3>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     return b;
   };
   auto theta = [](double d) {
-    const auto eps = 0.1;
+    const auto eps = 0.001;
     return 1.0 / (d * d + eps * eps);
   };
   Eigen::Matrix<double, nBasis, nBasis> A;
@@ -113,6 +111,5 @@ double moving_least_squares<3>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     b += theta(x.norm()) * basis(x) * f[i];
   }
   Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  igl::pinv(A, b);
   return c[0];
 }

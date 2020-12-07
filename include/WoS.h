@@ -61,8 +61,8 @@ struct WoSPointCloud {
 void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
                               const std::function<double(const Eigen::Vector3d)> &f,
                               const std::function<Eigen::Vector3d(Eigen::Vector3d)> &region,
-                              const Eigen::Vector3d &center, double Rmax, size_t total_walks,
+                              const Eigen::Vector3d &center, double Rmax, size_t walks_per_point, size_t total_walks,
                               WoSPointCloud &point_cloud);
 
-void wos_point_cloud_interpolate(const WoSPointCloud &point_cloud,const Eigen::MatrixXd &P, Eigen::VectorXd &U,
+void wos_point_cloud_interpolate(const WoSPointCloud &point_cloud, const Eigen::MatrixXd &P, Eigen::VectorXd &U,
                                  Eigen::MatrixXd &U_grad);
