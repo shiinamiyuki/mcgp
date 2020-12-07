@@ -60,3 +60,11 @@ void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F,
                      int num_walks,
                      Eigen::VectorXd &U,
                      Eigen::MatrixXd &U_grad);
+
+
+void walk_on_spheres(const std::function<std::pair<double,double>(const Eigen::Vector3d)> &sdf_bc,
+                     const Eigen::MatrixXd &P,
+                     const std::function<double(const Eigen::Vector3d)> &f,
+                     int num_walks,
+                     Eigen::VectorXd &U,
+                     Eigen::MatrixXd &U_grad);

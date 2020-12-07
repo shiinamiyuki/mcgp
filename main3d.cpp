@@ -13,12 +13,10 @@ void test_poi2d() {
   auto sdf = [](Eigen::Vector2d p) { return sqrt(pow(p[0],2) + pow(p[1],2)) - 1; };
   auto bc = [](Eigen::Vector2d p) { return cos(2*igl::PI*p[0])*sin(2*igl::PI*p[1]); };
   auto sdfbc = sdf_bc(sdf, bc);
-  double sd, bcval;
+  double sd,bcval;
   Eigen::Vector2d p(2,2);
   std::tie(sd,bcval) = sdfbc(p);
   std::cout << sd << " " << bcval << std::endl;
-
-  // Eigen::Vector2d P()
 }
 
 int wpp = 16;
