@@ -6,7 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 option(LIBIGL_USE_STATIC_LIBRARY     "Use libigl as static library" OFF)
 option(LIBIGL_WITH_OPENGL            "Use OpenGL"         ON)
 option(LIBIGL_WITH_OPENGL_GLFW       "Use GLFW"           ON)
-option(LIBIGL_WITH_EMBREE            "Use Embree"         ON)
+option(LIBIGL_WITH_EMBREE            "Use Embree"         OFF)
 option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui"          OFF)
 
 # i need to use an embree build with avx2
@@ -20,7 +20,12 @@ file(GLOB SRCFILES src/*.cpp)
 
 
 add_library(core ${SRCFILES})
-target_link_libraries(core igl::core igl::opengl igl::opengl_glfw igl::embree)
+if(LIBIGL_WITH_EMBREE)
+    target_link_libraries(core igl::core igl::opengl igl::opengl_glfw igl::embree)
+else()
+    target_link_libraries(core igl::core igl::opengl igl::opengl_glfw)
+endif()
+
 
 add_executable(mcgp "main.cpp")
 target_link_libraries(mcgp core igl::core igl::opengl igl::opengl_glfw igl::png)

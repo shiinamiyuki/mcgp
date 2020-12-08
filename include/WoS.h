@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 #include <functional>
-#include <igl/embree/EmbreeIntersector.h>
+
 // Solve ∆u = -f over space at given poinst P subject to B on the given boundary
 // mesh (V,F)
 //
@@ -67,10 +67,10 @@ void walk_on_spheres3d_region(const std::function<std::pair<double, double>(cons
                               WoSPointCloud &point_cloud);
 
 
-// Interpolate a point_cloud previously comptued by walk_on_spheres3d_region at P
+// Interpolate a point_cloud previously comptued by WoS at P
 // The interpolation uses 2nd degree moving least squares on k-nearest sample points
 // Inputs:
-//   point_cloud    comptued by walk_on_spheres3d_region
+//   point_cloud    comptued by WoS
 //   P              #P by 3 list of query positions
 // Outputs:
 //   U              #P by 1 list of values at query positions

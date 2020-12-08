@@ -15,6 +15,8 @@
 #include <green.h>
 #include <WoS.h>
 #include <mls.h>
+#include <mesh_centroid_bound.h>
+#include <sdf_bc.h>
 
 // returns a random value in the range [rMin,rMax]
 static thread_local std::random_device rd;
@@ -235,38 +237,14 @@ void walk_on_spheres3d(const std::function<std::pair<double, double>(const Eigen
   });
 }
 
-void walk_on_spheres(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
+void walk_on_spheres_mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const Eigen::VectorXd &B,
                      const Eigen::MatrixXd &P, const std::function<double(const Eigen::Vector3d)> &f, int num_walks,
                      Eigen::VectorXd &U, Eigen::MatrixXd &U_grad) {
-  igl::embree::EmbreeIntersector ei;
-  ei.init(V.cast<float>(), F);
-  auto sdf_bc = [&](const Eigen::Vector3d &p) -> std::pair<double, double> {
-    int closest_face;
-    float distance;
-    ei.distance(p.cast<float>(), distance, closest_face);
-    double bc;
-    {
-      std::array<Eigen::RowVector3d, 3> triangle;
-      triangle[0] = V.row(F(closest_face, 0));
-      triangle[1] = V.row(F(closest_face, 1));
-      triangle[2] = V.row(F(closest_face, 2));
-      Eigen::RowVector3d uv;
-      igl::barycentric_coordinates(Eigen::RowVector3d(p), triangle[0], triangle[1], triangle[2], uv);
-      Eigen::Vector3d gx;
-      gx[0] = B[F(closest_face, 0)];
-      gx[1] = B[F(closest_face, 1)];
-      gx[2] = B[F(closest_face, 2)];
-      bc = uv.dot(gx);
-    }
-    return std::make_pair(double(distance), bc);
-  };
-  Eigen::Vector3d center;
-  igl::centroid(V, F, center);
-  double Rmax = 0.0;
-  for (int i = 0; i < V.rows(); i++) {
-    Rmax = std::max((V.row(i).transpose() - center).norm(), Rmax);
-  }
-  walk_on_spheres3d(sdf_bc, P, f, center, Rmax * 2.0, num_walks, U, U_grad);
+  auto sdf_bc = sdf_bc_mesh(V, F, B);
+  Eigen::Vector3d centroid;
+  double Rmax;
+  mesh_centroid_bound(V, F, centroid, Rmax);
+  walk_on_spheres3d(sdf_bc, P, f, centroid, Rmax * 2.0, num_walks, U, U_grad);
 }
 
 void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
