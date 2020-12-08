@@ -21,9 +21,9 @@ An implementation of "Monte Carlo Geometry Processing: A Grid-Free Approach to P
 This paper introduces the _walk on spheres_ (WoS) algorithm for solving linear elliptic partial differential equations (PDEs) to the geometry processing (GP) community, and illustrates its potential in GP applications by presenting lots of examples. The two main analytical apparatus, the Kakutani's principle and the mean value property, allow one to write the solution $u(x)$ to the PDE in the form of a recursive integral formula
 \[u(x) = \frac{1}{|\partial B(x)|}\int_{\partial B(x)} u(y)\,dy + \int_{B(x)} f(y) G(x,y)\, dy,\] which can be easily approximated by a Monte Carlo estimate. Similarly, the gradient and higher-order derivatives can be approximated by the same manner with negligible overheads. 
 
-The authors also introduce two variance reduction techniques for WoS. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. __TODO__ importance sampling. 
+The authors also introduce two variance reduction techniques for the WoS algorithm. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. __TODO__ importance sampling. 
 
-
+Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and 
 
 
 ## Potential Problems in the Original Paper
@@ -33,3 +33,9 @@ The following discussions may contain mistakes, so please read it at your own di
 - In section 3.1, it says that "The WoS estimator just adds a single sample of the latter integral
 for each step of the walk". But we think we should add a single sample for *each walk* instead of *each step of the walk*.
 - In Appendix B, the author provides a way to importance sample 3D harmonic Green's function by first uniformly sample $\hat{y}  on unit sphere than samples $r$ from a distribution proportional to $r^2sin(\theta)$. However, this turns out to be exactly the same as uniformly sampling the unit ball since importance sampling $r^2sin(\theta)$ yields in $r=u^{1/3}$, where $u ~ Uniform[0,1)$. Also the reference [Devroye 1986, Section 9.4] for this technique cannot be found (there are only 8 sections).
+
+## Appendix: Special about PDEs in GP
+- Cauchy problems
+- Treatments of different boundary representations
+- People are not too picky about accuracy of the solution (in the mathematical sense)
+- Size of the mesh (i.e., the problem) is fixed (unless you do remeshing) and usually fairly large
