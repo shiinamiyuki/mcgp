@@ -40,6 +40,7 @@ $$X = \nabla u + \nabla\times A + Y.$$
 We also implemented a vector field visualizer to illustrate our result __TODO__.
 
 ## Possible Improvements
+These are features that can be implemented in reasonable time but we didn't implement.
 - Implement MCGP on CUDA
 - Use Low-discrepancy sequence for random number generation (Quasi-Monte Carlo). Reason: QMC enforces some constraint on usage in order to prevent correlation between samples and such integration will make our library not as intuitive as it is now.
 - By incoprarting *A Simple and Robust Mutation Strategy for the Metropolis Light Transport Algorithm, Kelemen et al. 2002*, one can implement MCGP using Markov Chain Monte Carlo (MCMC). Though the effectiveness of this approach is unknown.
