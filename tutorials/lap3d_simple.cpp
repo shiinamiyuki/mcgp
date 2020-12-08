@@ -5,8 +5,8 @@
 
 int main() {
 
-  auto solf = [](Eigen::Vector3d v) { return 1 / (Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(); };
-  auto solf_grad = [](Eigen::Vector3d v) {
+  auto solf = [](Eigen::Vector3d v) -> double { return 1 / (Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(); };
+  auto solf_grad = [](Eigen::Vector3d v) -> Eigen::Vector3d{
     return (Eigen::Vector3d(1.0, 1.0, 1.0) - v) / pow((Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(), 3);
   };
 
