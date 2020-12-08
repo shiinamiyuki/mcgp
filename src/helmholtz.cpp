@@ -26,9 +26,11 @@ void helm3d(
   walk_on_spheres3d(sdfbc,P,[=](Eigen::Vector3d p){ return -divX(p); },center,Rmax,nWalks,u,gradu);
   // std::cout << gradu << std::endl;
 
-  auto curlX0 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[0]; };
-  auto curlX1 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[1]; };
-  auto curlX2 = [=](Eigen::Vector3d p) -> double { return -curlX(p)[2]; };
+  // These RHS doesn't need to be negative, based on http://sci.utah.edu/~hbhatia/pubs/2014_TVCG_nHHD.pdf. 
+  // The MCGP paper may be wrong.
+  auto curlX0 = [=](Eigen::Vector3d p) -> double { return curlX(p)[0]; };
+  auto curlX1 = [=](Eigen::Vector3d p) -> double { return curlX(p)[1]; };
+  auto curlX2 = [=](Eigen::Vector3d p) -> double { return curlX(p)[2]; };
 
 
   walk_on_spheres3d(sdfbc,P,curlX0,center,Rmax,nWalks,A0,gradA0);
