@@ -28,6 +28,10 @@ Although one of the advantage of the WoS algorithm is that one can evaluate the 
 ## Implementation
 To our best knowledge, as of today, this is the only open source MCGP with decent amount of features implemented. Although our library accepts triangle mesh inputs, the core algorithm is based on SDFs. Moreover, all it takes are a SDF that defines the domain, and the corresponding boundary condition function.
 
+## Possible Improvements
+- Implement MCGP on CUDA
+- Use Low-discrepancy sequence for random number generation (Quasi-Monte Carlo). Reason: QMC enforces some constraint on usage in order to prevent correlation between samples and such integration will make our library not as intuitive as it is now.
+- By incoprarting *A Simple and Robust Mutation Strategy for the Metropolis Light Transport Algorithm, Kelemen et al. 2002*, one can implement MCGP using Markov Chain Monte Carlo (MCMC). Though the effectiveness of this approach is unknown.
 
 ## Potential Problems in the Original Paper
 The following discussions may contain mistakes, so please read it at your own discretion.
