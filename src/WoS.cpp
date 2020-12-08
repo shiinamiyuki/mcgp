@@ -250,7 +250,7 @@ void walk_on_spheres_mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, co
 void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
                               const std::function<double(const Eigen::Vector3d)> &f,
                               const std::function<Eigen::Vector3d(Eigen::Vector3d)> &region,
-                              const Eigen::Vector3d &center, double Rmax, size_t walks_per_point, size_t total_walks,
+                              const Eigen::Vector3d &center, double Rmax, size_t points_per_pass, size_t walks_per_point, size_t total_walks,
                               WoSPointCloud &point_cloud) {
   point_cloud.resize(0);
   const auto walks_per_candidate = walks_per_point;
@@ -266,7 +266,7 @@ void walk_on_spheres3d_region(const std::function<std::pair<double, double>(cons
     Eigen::MatrixXi O_CH;
     Eigen::MatrixXd O_CN;
     Eigen::VectorXd O_W;
-    size_t n_max_candidate = std::min<size_t>(1024, (total_walks - accumluate_walks) / walks_per_candidate);
+    size_t n_max_candidate = std::min<size_t>(points_per_pass, (total_walks - accumluate_walks) / walks_per_candidate);
     Eigen::MatrixXd P(n_max_candidate, 3);
     std::vector<Eigen::Vector3d> candidates;
     for (size_t i = 0; i < n_max_candidate; i++) {

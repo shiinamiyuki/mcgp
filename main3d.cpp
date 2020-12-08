@@ -104,7 +104,7 @@ void test_lap3d_adaptive() {
     return Eigen::Vector3d(p.x() * 2.0 - 1.0, p.y() * 2.0 - 1.0, 0.0);
   };
   WoSPointCloud point_cloud;
-  walk_on_spheres3d_region(sdfbc, solf_lap, region, Eigen::Vector3d::Zero(), 2.0, 4096, 10240000, point_cloud);
+  walk_on_spheres3d_region(sdfbc, solf_lap, region, Eigen::Vector3d::Zero(), 2.0, 1024, 4096, 10240000, point_cloud);
   // std::cout << point_cloud.U << std::endl;
   // int nquery = 1;
   // Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);

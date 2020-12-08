@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   }
   P1.conservativeResize(cnt, Eigen::NoChange);
   P2.resizeLike(P1);
-
+  std::cout << "solving ..." << std::endl;
   helm3d(sdf, Eigen::Vector3d::Zero(), 2.0, X, divX, curlX, P1, 4096, gradu, curlA, Y);
   std::cout << curlA << std::endl;
   for (int i = 0; i < cnt; i++) {

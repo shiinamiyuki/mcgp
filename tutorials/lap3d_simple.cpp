@@ -17,6 +17,7 @@ int main() {
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);
   Eigen::VectorXd U(nquery), sol(nquery);
   P << 0.4, 0.2, 0.1;
+  std::cout << "solving ..." << std::endl;
   walk_on_spheres3d(
     sdfbc, P, [](Eigen::Vector3d p) { return 0.0; }, Eigen::Vector3d::Zero(), 2.0, 1024000, U, U_grad);
   std::cout << "U:" << U << std::endl;

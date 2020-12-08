@@ -56,16 +56,15 @@ struct WoSPointCloud {
 // Solve ∆u = -f over space parameterized by region using adpative sampling
 // Inputs:
 //  region                  [0,1)^3 -> R^3
-//  walks_per_point         walks per sample point, please select a number that would generate a roughly converged estimate
-//  total_walks             total computation budget
+//  walks_per_point         walks per sample point, please select a number that would generate a roughly converged
+//  estimate total_walks             total computation budget
 // Outputs:
 //  point_cloud             a point cloud stores the estimate at each sample point
 void walk_on_spheres3d_region(const std::function<std::pair<double, double>(const Eigen::Vector3d)> &sdf_bc,
                               const std::function<double(const Eigen::Vector3d)> &f,
                               const std::function<Eigen::Vector3d(Eigen::Vector3d)> &region,
-                              const Eigen::Vector3d &center, double Rmax, size_t walks_per_point, size_t total_walks,
-                              WoSPointCloud &point_cloud);
-
+                              const Eigen::Vector3d &center, double Rmax, size_t points_per_pass,
+                              size_t walks_per_point, size_t total_walks, WoSPointCloud &point_cloud);
 
 // Interpolate a point_cloud previously comptued by WoS at P
 // The interpolation uses 2nd degree moving least squares on k-nearest sample points

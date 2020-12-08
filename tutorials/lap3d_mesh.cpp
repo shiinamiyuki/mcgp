@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);
   Eigen::VectorXd U(nquery), sol(nquery);
   P << 0.4, 0.2, 0.1;
+  std::cout << "solving ..." << std::endl;
   igl::Timer timer;
   timer.start();
   walk_on_spheres_mesh(
