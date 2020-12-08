@@ -26,7 +26,7 @@ The authors also introduce two variance reduction techniques for the WoS algorit
 Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced __TODO__ (adaptive, etc)
 
 ## Build from source
-We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high performance BVH building and closest point query. This does significantly increase build time for the first time (10~20 minutes). Patience! :D.
+We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high performance BVH building and closest point query. This does significantly increase build time for the first time (10~20 minutes on Windows but A LOT faster on Linux). Patience! :D.
 
 ## Implementation
 To our best knowledge, as of today, this is the only open source MCGP with decent amount of features implemented. 
