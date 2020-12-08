@@ -275,10 +275,10 @@ void walk_on_spheres3d_region(const std::function<std::pair<double, double>(cons
                               const Eigen::Vector3d &center, double Rmax, size_t walks_per_point, size_t total_walks,
                               WoSPointCloud &point_cloud) {
   point_cloud.resize(0);
-  const int walks_per_candidate = walks_per_point;
+  const auto walks_per_candidate = walks_per_point;
   size_t accumluate_walks = 0;
   int consecutive_zeros = 0;
-  int max_iter = 4 * (total_walks / walks_per_candidate / 1024) + 1;
+  int max_iter = 8 * (total_walks / walks_per_candidate / 1024) + 1;
   int iter = 0;
   while (accumluate_walks < total_walks && iter < max_iter) {
     iter++;
