@@ -15,3 +15,9 @@ An implementation of "Monte Carlo Geometry Processing: A Grid-Free Approach to P
   - Adaptive Sampling & Interpolation
 - Applications:
   - Helmholtz decomposition
+
+## Potential Problems in the Original Paper
+The following discussions may contain mistakes, so please read it at your own discretion.
+- In section 2.3, the author defines Poisson's equation to be $\nabla u = f$. However, all derivations of related formulas are based on the definition $-\nabla u = f$.
+- In section 3.1, it says that "The WoS estimator just adds a single sample of the latter integral
+for each step of the walk". But we think we should add a single sample for *each walk* instead of *each step of the walk*.
