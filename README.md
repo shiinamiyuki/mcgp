@@ -23,7 +23,7 @@ This paper introduces the _walk on spheres_ (WoS) algorithm for solving linear e
 
 The authors also introduce two variance reduction techniques for the WoS algorithm. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. __TODO__ importance sampling. 
 
-Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and 
+Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced 
 
 
 ## Potential Problems in the Original Paper
@@ -34,8 +34,9 @@ The following discussions may contain mistakes, so please read it at your own di
 for each step of the walk". But we think we should add a single sample for *each walk* instead of *each step of the walk*.
 - In Appendix B, the author provides a way to importance sample 3D harmonic Green's function by first uniformly sample $\hat{y}  on unit sphere than samples $r$ from a distribution proportional to $r^2sin(\theta)$. However, this turns out to be exactly the same as uniformly sampling the unit ball since importance sampling $r^2sin(\theta)$ yields in $r=u^{1/3}$, where $u ~ Uniform[0,1)$. Also the reference [Devroye 1986, Section 9.4] for this technique cannot be found (there are only 8 sections).
 
-## Appendix: Special about PDEs in GP
-- Cauchy problems
-- Treatments of different boundary representations
+## Appendix: What is Special about PDEs in GP
+I was curious about what's special about PDE problems in the GP setting. Now I have some answers:
+- Cauchy problems (e.g., diffusion curves)
+- Treatments of different boundary representations (e.g., polygon soup, implicit surfaces, NURBS, meshes)
 - People are not too picky about accuracy of the solution (in the mathematical sense)
 - Size of the mesh (i.e., the problem) is fixed (unless you do remeshing) and usually fairly large
