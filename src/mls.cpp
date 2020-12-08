@@ -17,7 +17,8 @@ double moving_least_squares<1>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     return b;
   };
   auto theta = [](double d) {
-    const auto eps = 0.00001;
+    const auto eps = 0.0001;
+
     return 1.0 / (d * d + eps * eps);
   };
   Eigen::Matrix<double, nBasis, nBasis> A;
@@ -30,7 +31,7 @@ double moving_least_squares<1>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     b += theta(x.norm()) * basis(x) * f[i];
   }
   Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  return c[0];
+  return basis(Eigen::Vector3d::Zero()).dot(c);
 }
 
 template <>
@@ -64,9 +65,11 @@ double moving_least_squares<2>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     A += theta(x.norm()) * basis(x) * basis(x).transpose();
     b += theta(x.norm()) * basis(x) * f[i];
   }
-//   std::cout << "A:\n" << A << "\nb:\n" << b << std::endl;
-  Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  return c[0];
+  // std::cout << "A:\n" << A << "\nb:\n" << b << std::endl;
+  Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV).solve(b);
+  // std::cout << "c:\n" << c << std::endl;
+  // std::cout << "redisual:\n" << (A * c - b) << std::endl;
+  return basis(Eigen::Vector3d::Zero()).dot(c);
 }
 
 template <>
@@ -98,7 +101,7 @@ double moving_least_squares<3>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     return b;
   };
   auto theta = [](double d) {
-    const auto eps = 0.001;
+    const auto eps = 0.0001;
     return 1.0 / (d * d + eps * eps);
   };
   Eigen::Matrix<double, nBasis, nBasis> A;
@@ -111,5 +114,5 @@ double moving_least_squares<3>(const Eigen::VectorXd &f, const Eigen::MatrixXd &
     b += theta(x.norm()) * basis(x) * f[i];
   }
   Eigen::Matrix<double, nBasis, 1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
-  return c[0];
+  return basis(Eigen::Vector3d::Zero()).dot(c);
 }

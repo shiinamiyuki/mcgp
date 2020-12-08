@@ -11,6 +11,7 @@ An implementation of "Monte Carlo Geometry Processing: A Grid-Free Approach to P
   - Control variates
   - Multiple importance sampling
 - Visualization:
-  - TODO
+  - Solving over arbitrary region of interest
+  - Adaptive Sampling & Interpolation
 - Applications:
   - Helmholtz decomposition

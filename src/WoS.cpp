@@ -363,10 +363,26 @@ void wos_point_cloud_interpolate(const WoSPointCloud &point_cloud, const Eigen::
   Eigen::VectorXd grad_x = point_cloud.U_grad.col(0);
   Eigen::VectorXd grad_y = point_cloud.U_grad.col(1);
   Eigen::VectorXd grad_z = point_cloud.U_grad.col(2);
+  std::vector<std::vector<int>> O_PI;
+  Eigen::MatrixXi O_CH;
+  Eigen::MatrixXd O_CN;
+  Eigen::VectorXd O_W;
+  igl::octree(point_cloud.P, O_PI, O_CH, O_CN, O_W);
+  Eigen::MatrixXi I;
+  igl::knn(P, point_cloud.P, 16, O_PI, O_CH, O_CN, O_W, I);
   igl::parallel_for(P.rows(), [&](int i) {
-    U[i] = moving_least_squares(point_cloud.U, point_cloud.P, P.row(i));
-    U_grad(i, 0) = moving_least_squares(grad_x, point_cloud.P, P.row(i));
-    U_grad(i, 1) = moving_least_squares(grad_y, point_cloud.P, P.row(i));
-    U_grad(i, 2) = moving_least_squares(grad_z, point_cloud.P, P.row(i));
+    Eigen::Matrix<double, 16, 1> knn_gx, knn_gy, knn_gz, knn_u;
+    Eigen::Matrix<double, 16, 3> knn_p;
+    for (int j = 0; j < 16; j++) {
+      knn_gx[j] = grad_x[I(i, j)];
+      knn_gy[j] = grad_y[I(i, j)];
+      knn_gz[j] = grad_z[I(i, j)];
+      knn_u[j] = point_cloud.U[I(i, j)];
+      knn_p.row(j) = point_cloud.P.row(I(i, j));
+    }
+    U[i] = moving_least_squares(knn_u, knn_p, P.row(i));
+    U_grad(i, 0) = moving_least_squares(knn_gx, knn_p, P.row(i));
+    U_grad(i, 1) = moving_least_squares(knn_gy, knn_p, P.row(i));
+    U_grad(i, 2) = moving_least_squares(knn_gz, knn_p, P.row(i));
   });
 }

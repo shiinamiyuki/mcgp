@@ -12,10 +12,10 @@ int main() {
   };
   WoSPointCloud point_cloud;
   constexpr int w = 256, h = 256;
-  constexpr int wpp = 160;
+  constexpr int wpp = 1024;
   constexpr size_t total = w * h * wpp;
   walk_on_spheres3d_region(
-    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, 4096, total,
+    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, 4096 * 4, total,
     point_cloud);
 
   int nquery = w * h;

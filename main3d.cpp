@@ -36,7 +36,7 @@ void test_lap3d() {
 }
 void test_mls_img() {
   auto solf = [](Eigen::Vector3d v) { return cos(2.0 * igl::PI * v[0]) * sin(2.0 * igl::PI * v[1]); };
-  int w = 64, h = 64;
+  int w = 256, h = 256;
   auto write_solution = [=](const Eigen::VectorXd &u, const char *path) {
     Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> R(w, h);
     Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> G(w, h);
@@ -55,11 +55,11 @@ void test_mls_img() {
     igl::png::writePNG(R, G, B, A, path);
   };
   int nquery = w * h;
-  Eigen::MatrixXd P(nquery, 3), PC(1024, 3);
-  Eigen::VectorXd U(nquery), sol(nquery), U1(1024);
+  Eigen::MatrixXd P(nquery, 3), PC(10240, 3);
+  Eigen::VectorXd U(nquery), sol(nquery), U1(10240);
   std::random_device rd;
   std::uniform_real_distribution<double> dist(-1, 1);
-  for (int i = 0; i < 1024; i++) {
+  for (int i = 0; i < 10240; i++) {
     Eigen::Vector3d p(dist(rd), dist(rd), 0.0);
     PC.row(i) = p;
     U1[i] = solf(p);
@@ -71,7 +71,7 @@ void test_mls_img() {
     }
   }
   for (int i = 0; i < nquery; i++) {
-    U[i] = moving_least_squares(U1, PC, P.row(i));
+    U[i] = moving_least_squares<2>(U1, PC, P.row(i));
   }
   for (int i = 0; i < nquery; i++) {
     sol[i] = solf(P.row(i));
@@ -98,13 +98,13 @@ void test_lap3d_adaptive() {
   // };
 
   auto sdf = [](Eigen::Vector3d p) { return p.norm() - 1.0; };
-  auto bc = [&](Eigen::Vector3d p) { return solf(p); };
+  auto bc = [&](Eigen::Vector3d p) { return abs(p.x()) > 0.5 ? 1.0 : 0.0; };
   auto sdfbc = sdf_bc3d(sdf, bc);
   auto region = [](Eigen::Vector3d p) -> Eigen::Vector3d {
     return Eigen::Vector3d(p.x() * 2.0 - 1.0, p.y() * 2.0 - 1.0, 0.0);
   };
   WoSPointCloud point_cloud;
-  walk_on_spheres3d_region(sdfbc, solf_lap, region, Eigen::Vector3d::Zero(), 2.0, 10240000, point_cloud);
+  walk_on_spheres3d_region(sdfbc, solf_lap, region, Eigen::Vector3d::Zero(), 2.0, 4096, 10240000, point_cloud);
   // std::cout << point_cloud.U << std::endl;
   // int nquery = 1;
   // Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);
@@ -201,11 +201,12 @@ void test_poi3d() {
 
 void test_mls() {
   // auto solf = [](Eigen::Vector3d v) { return cos(2.0 * igl::PI * v[0]) * sin(2.0 * igl::PI * v[1]); };
-  auto solf = [](Eigen::Vector3d v) { return v[0] * v[1] + v[0] + v[1] + 1.0; };
+  auto solf = [](Eigen::Vector3d v) { return cos(2.0 * igl::PI * v[0]); };
+  // auto solf = [](Eigen::Vector3d v) { return v[0] * v[1] + v[0] + v[1] + 1.0; };
   std::vector<Eigen::Vector3d> xs;
   std::vector<double> f;
-  for (double x = -1.0; x < 1.0; x += 0.1) {
-    for (double y = -1.0; y < 1.0; y += 0.1) {
+  for (double x = -1; x < 1; x += 0.1) {
+    for (double y = -1; y < 1; y += 0.1) {
       xs.push_back(Eigen::Vector3d(x, y, 0.0));
       f.push_back(solf(Eigen::Vector3d(x, y, 0.0)));
     }
@@ -216,12 +217,14 @@ void test_mls() {
     Xs.row(i) = xs[i];
     F[i] = f[i];
   }
-  auto v = Eigen::Vector3d(0.15, 0.25, 0.0);
-  auto approx = moving_least_squares(F, Xs, v);
-  std::cout << "approx: " << approx << " ref: " << solf(v) << std::endl;
+  for (double t = 0.1; t <= 0.22; t += 0.01) {
+    auto v = Eigen::Vector3d(t, 0.2, 0.0);
+    auto approx = moving_least_squares<2>(F, Xs, v);
+    std::cout << "approx: " << approx << " ref: " << solf(v) << std::endl;
+  }
 }
 int main(int argc, char *argv[]) {
-  // test_mls_img();
+  test_mls();
   // Eigen::MatrixXd V;
   // Eigen::MatrixXi F;
   // igl::read_triangle_mesh((argc > 1 ? argv[1] : "../data/icosphere.obj"), V, F);
@@ -235,7 +238,7 @@ int main(int argc, char *argv[]) {
   //   viewer.data().set_mesh(V, F);
   //   viewer.data().compute_normals();
   // };
-  test_lap3d_adaptive();
+  // test_lap3d_adaptive();
   // int nV = V.rows();
   // std::cout << nV << std::endl;
   // std::cout << V.mean() << std::endl;
