@@ -30,7 +30,7 @@ Although one of the advantage of the WoS algorithm is that one can evaluate the 
 git clone --recursive http://github.com/shiinamiyuki/mcgp.git
 cd mcgp && mkdir build
 cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j4
+make -j `nproc`
 ```
 We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high performance BVH building and closest point query, and it will take around 15 minutes for the first build.
 
