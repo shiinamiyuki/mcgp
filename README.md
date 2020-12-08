@@ -18,8 +18,12 @@ An implementation of "Monte Carlo Geometry Processing: A Grid-Free Approach to P
 
 
 ## Idea of the Paper
-This paper introduces the _walk on spheres_ algorithm for solving linear elliptic partial differential equations (PDEs) to the geometry processing (GP) community, and illustrates its potential in GP applications by presenting lots of examples. The two main analytical apparatus, the Kakutani's principle and the mean value property, allow one to write the solution $u(x)$ to the PDE in the form of a recursive integral formula
-\[u(x) = \frac{1}{|\partial B(x)|}\int_{\partial B(x)} u(y)\,dy + \int_{B(x)} f(y) G(x,y)\, dy,\] which can be easily approximated by a Monte Carlo estimate. Similarly, the gradient and higher-order derivatives can be approximated by the same manner.
+This paper introduces the _walk on spheres_ (WoS) algorithm for solving linear elliptic partial differential equations (PDEs) to the geometry processing (GP) community, and illustrates its potential in GP applications by presenting lots of examples. The two main analytical apparatus, the Kakutani's principle and the mean value property, allow one to write the solution $u(x)$ to the PDE in the form of a recursive integral formula
+\[u(x) = \frac{1}{|\partial B(x)|}\int_{\partial B(x)} u(y)\,dy + \int_{B(x)} f(y) G(x,y)\, dy,\] which can be easily approximated by a Monte Carlo estimate. Similarly, the gradient and higher-order derivatives can be approximated by the same manner with negligible overheads. 
+
+The authors also introduce two variance reduction techniques for WoS. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. __TODO__ importance sampling. 
+
+
 
 
 ## Potential Problems in the Original Paper
