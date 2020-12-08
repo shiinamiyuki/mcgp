@@ -23,7 +23,10 @@ This paper introduces the _walk on spheres_ (WoS) algorithm for solving linear e
 
 The authors also introduce two variance reduction techniques for the WoS algorithm. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. __TODO__ importance sampling. 
 
-Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced 
+Although one of the advantage of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced __TODO__
+
+## Implementation
+To our best knowledge, as of today, this is the only open source MCGP with decent amount of features implemented. Although our library accepts triangle mesh inputs, the core algorithm is based on SDFs. Moreover, all it takes are a SDF that defines the domain, and the corresponding boundary condition function.
 
 
 ## Potential Problems in the Original Paper
