@@ -3,6 +3,7 @@
 #include "WoS2d.h"
 #include "sdf_bc.h"
 #include <igl/png/writePNG.h>
+#include <igl/opengl/glfw/Viewer.h>
 int main() {
   auto sdf = [](Eigen::Vector3d p) { return p.norm() - 1.0; };
   auto bc = [&](Eigen::Vector3d p) { return abs(p.x()) > 0.5 ? 1.0 : 0.0; };
@@ -51,4 +52,11 @@ int main() {
   walk_on_spheres3d(
     sdfbc, P, [](Eigen::Vector3d p) { return 0.0; }, Eigen::Vector3d::Zero(), 2.0, wpp, U, U_grad);
   write_solution(U, "../images/uniform.png");
+
+  igl::opengl::glfw::Viewer viewer;
+  viewer.data().clear();
+  viewer.data().point_size = 4;
+  viewer.data().set_points(point_cloud.P, Eigen::RowVector3d(0, 0, 0));
+  viewer.launch();
+  return 0;
 }
