@@ -18,7 +18,7 @@ int main() {
   // std::tie(sd,bcval) = sdfbc(p);
   // std::cout << sd << " " << bcval << std::endl;
 
-  int w = 64, h = 64;
+  int w = 128, h = 128;
   int nquery = w * h;
   Eigen::MatrixXd P(nquery, 2), Ugrad(nquery, 2), sol_grad(nquery,2);
   Eigen::VectorXd U(nquery), sol(nquery);
@@ -38,7 +38,7 @@ int main() {
   }
 
 
-  walk_on_spheres2d(sdfbc,f,P,100,U,Ugrad);
+  walk_on_spheres2d(sdfbc,f,P,4096,U,Ugrad);
 
 
   for(int x = 0; x < w; x++){
