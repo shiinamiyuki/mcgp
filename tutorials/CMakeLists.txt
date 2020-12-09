@@ -16,3 +16,6 @@ target_link_libraries(poi3d_simple core igl::core igl::opengl igl::opengl_glfw i
 
 add_executable(helm "helm.cpp")
 target_link_libraries(helm core igl::core igl::opengl igl::opengl_glfw igl::png)
+
+add_executable(poi2d "poi2d.cpp")
+target_link_libraries(poi2d core igl::core igl::opengl igl::opengl_glfw igl::png)
