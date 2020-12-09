@@ -22,7 +22,7 @@ $$u(x) = \frac{1}{|\partial B(x)|}\int_{\partial B(x)} u(y)\,dy + \int_{B(x)} f(
 
 The authors also introduce two variance reduction techniques for the WoS algorithm. In the first technique, control variates are used to reduce the variance of both the solution and the gradient. The most interesting part is that, the variance of the solution is controlled by the running estimate of the gradient, and the variance of the gradient is controlled by the running estimate of the solution. In other words, they reinforce each other. 
 
-Although one of the advantages of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced __TODO__ (adaptive, etc)
+Although one of the advantages of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced adaptive sampling and interpolation using moving least squares. The author proposed a simple adaptive sampling scheme that adds a samples if the 1st order taylor expansion at that point cannot approxiate the solution well. 
 
 ## Build 
 ```
@@ -43,7 +43,9 @@ Our core algorithm is based on SDFs, since they allow one to query the distance 
 
 The effect of control variates is not substantial -- it reduces the variance by around 10% based on numerical experiments. Its implementation is fairly straightforward, except for a possible pitfall that is listed at the bottom of our report. 
 
-__TODO__ visualization
+When interpolating the solution using moving least squares, instead of fitting a polynomial for all sample points, we only fit the polynomial for k=16 nearest points. This is because MLS depends on sample distances which is unpredictable in adaptive sampling. In practice this knn interpolation scheme works well.
+
+For most of more demos, we visualize the solultion by solving on a cross section of a 3d domain. The solution (which is a scalar field) is reprensented by a grey scale image. For the gradient and Helmholtz decomposition (see below), we directly plot the vector field.
 
 We also implemented the 3-D Helmholtz decomposition as an application of MCGP in graphics. Note that they didn't use the most common definition of the Helmholtz decomposition
 $$X = \nabla u + \nabla\times A,$$ instead, they assume that $u$ and $A$ satisfy homogeneous Dirichlet boundary condition, which results in
@@ -66,6 +68,9 @@ Note that the decomposition relies on the correct approximation of the gradient 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree1.jpg" alt="Curl free" width="300"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree2.jpg" alt="Curl free" width="304"/>
 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree2.jpg" alt="Div free" width="299"/>
+
+#### Adaptive Sampling
+
 
 ## Possible Improvements
 Here is a list of features that we wish we could implement:
