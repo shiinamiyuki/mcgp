@@ -65,8 +65,6 @@ int main(int argc, char **argv) {
 
   std::cout << "uniform sampling ..." << std::endl;
 
-  // walk_on_spheres3d(
-  //   sdfbc, P, [](Eigen::Vector3d p) { return 0.0; }, Eigen::Vector3d::Zero(), 2.0, wpp, U, U_grad);
   WoSPointCloud cloud_uniform;
   walk_on_spheres3d_region(
     sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, total / (4096 * 4),

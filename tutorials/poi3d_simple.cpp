@@ -5,7 +5,7 @@
 #include <igl/PI.h>
 
 int main() {
-
+  // reference solution
   auto solf = [](Eigen::Vector3d v) { return cos(2.0 * igl::PI * v[0]) * sin(2.0 * igl::PI * v[1]); };
   auto solf_grad = [](Eigen::Vector3d v) -> Eigen::Vector3d {
     return Eigen::Vector3d(-2.0 * igl::PI * sin(2.0 * igl::PI * v[0]) * sin(2.0 * igl::PI * v[1]),

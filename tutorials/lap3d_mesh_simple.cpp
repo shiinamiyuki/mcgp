@@ -6,12 +6,13 @@
 #include <igl/png/writePNG.h>
 #include <igl/opengl/glfw/Viewer.h>
 int main(int argc, char **argv) {
-  int wpp = 16;
+  int wpp = 128;
   Eigen::MatrixXd V;
   Eigen::MatrixXi F;
   Eigen::VectorXd B;
 
   igl::read_triangle_mesh((argc > 1 ? argv[1] : "../data/knot.obj"), V, F);
+  wpp = argc > 2 ? std::stoi(argv[2]) : wpp;
   auto solf = [](Eigen::Vector3d v) -> double { return 1 / (Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(); };
   auto solf_grad = [](Eigen::Vector3d v) -> Eigen::Vector3d {
     return (Eigen::Vector3d(1.0, 1.0, 1.0) - v) / pow((Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(), 3);
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
   igl::Timer timer;
   timer.start();
   walk_on_spheres_mesh(
-    V, F, B, P, [](Eigen::Vector3d p) { return 0.0; }, 128000, U, U_grad);
+    V, F, B, P, [](Eigen::Vector3d p) { return 0.0; }, wpp, U, U_grad);
   timer.stop();
   std::cout << "took " << timer.getElapsedTimeInSec() << "s" << std::endl;
   std::cout << "U:" << U << std::endl;
