@@ -70,7 +70,7 @@ Note that the decomposition relies on the correct approximation of the gradient 
 ## Possible Improvements
 Here is a list of features that we wish we could implement:
 - Implement MCGP on CUDA
-- Use a low-discrepancy sequence for random number generation (Quasi-Monte Carlo). Reason: QMC enforces some constraint on usage to prevent correlation between samples and such integration will make our library not as intuitive as it is now.
+- Use a low-discrepancy sequence for random number generation (Quasi-Monte Carlo). However, QMC enforces some constraint on usage to prevent correlation between samples and such integration will make our library not as intuitive as it is now.
 - By incorporating *A Simple and Robust Mutation Strategy for the Metropolis Light Transport Algorithm, Kelemen et al. 2002*, one can implement MCGP using Markov Chain Monte Carlo (MCMC). Though the effectiveness of this approach is unknown.
 
 ## Potential Problems in the Original Paper
