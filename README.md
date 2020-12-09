@@ -24,6 +24,8 @@ The authors also introduce two variance reduction techniques for the WoS algorit
 
 Although one of the advantages of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced adaptive sampling and interpolation using moving least squares. The author proposed a simple adaptive sampling scheme that adds a samples if the 1st order taylor expansion at that point cannot approxiate the solution well. 
 
+
+
 ## Build 
 ```
 git clone --recursive http://github.com/shiinamiyuki/mcgp.git
@@ -34,7 +36,8 @@ make -j `nproc`
 We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high-performance BVH building and closest point query. Passing -DLIBIGL_WITH_EMBREE=ON to turn on this feature (OFF by default). It will take around 15 minutes for the first build.
 
 ## Sample Code
-The `tutorials` folder containing many runnable examples.
+The `tutorials` folder contains many runnable examples. Make sure the working directory is `./build`.
+
 
 ## Implementation
 To our best knowledge, as of today, this is the only open-source MCGP with a decent amount of features implemented. 
