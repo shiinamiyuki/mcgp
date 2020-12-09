@@ -46,6 +46,7 @@ We also implemented the 3-D Helmholtz decomposition as an application of MCGP in
 $$X = \nabla u + \nabla\times A,$$ instead, they assume that $u$ and $A$ satisfy homogeneous Dirichlet boundary condition, which results in
 $$X = \nabla u + \nabla\times A + Y.$$
 We also implemented a vector field visualizer to illustrate our result. In this example, the input vector field is $(x^2 \cos(y), xyz, e^{xy})$.
+
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree1.jpg" alt="Curl free" width="300"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree2.jpg" alt="Curl free" width="304"/>
 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree2.jpg" alt="Div free" width="299"/>
