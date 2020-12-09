@@ -58,6 +58,8 @@ $$-\nabla^2 u = 8\pi^2\cos(2\pi x)\sin(2\pi x) \quad \text{for } x\in D, $$
 $$u(x,y) = cos(2\pi x)\sin(2\pi x)\quad \text{for } x\in \partial D.$$
 The numerical results are as follows. The left and middle one are the WoS approximations when the number of steps is 1024 and 4096, respectively. The rightmost one is the ground truth.
 
+<img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/poi2d_1024.png" alt="1024"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/poi2d_4096.png" alt="4096"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/poi2d_groundtruth.png" alt="truth"/>
+
 #### Helmholtz Decomposition
 Note that the decomposition relies on the correct approximation of the gradient of the solutions, so it will demonstrate both the correctness of our gradient approximation, and one of the potential applications of the WoS algorithm. We also implemented a vector field visualizer to illustrate our result. In the following example, we set the input vector field to be $(x^2 \cos(y), xyz, e^{xy})$.
 
