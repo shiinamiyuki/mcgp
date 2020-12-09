@@ -70,7 +70,7 @@ Note that the decomposition relies on the correct approximation of the gradient 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree2.jpg" alt="Div free" width="299"/>
 
 #### Adaptive Sampling
-
+<img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/uniform.jpg" alt="Div free" width="299"/>
 
 ## Possible Improvements
 Here is a list of features that we wish we could implement:

@@ -2,6 +2,8 @@
 
 #include <Eigen/Core>
 
+/* Decomposite vector field X into X = grad u + curl A + Y
+*/
 void helm3d(
   const std::function<double(const Eigen::Vector3d)> sdf,
   const Eigen::Vector3d center,
