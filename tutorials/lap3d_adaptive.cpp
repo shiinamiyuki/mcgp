@@ -25,24 +25,6 @@ int main(int argc, char **argv) {
   constexpr int w = 256, h = 256;
   constexpr int wpp = 1024;
   constexpr size_t total = w * h * wpp;
-  std::cout << "computing point cloud..." << std::endl;
-  walk_on_spheres3d_region(
-    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, 1024, 4096 * 4, total,
-    point_cloud);
-
-  int nquery = w * h;
-  Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);
-  Eigen::VectorXd U(nquery), sol(nquery);
-
-  for (int x = 0; x < w; x++) {
-    for (int y = 0; y < h; y++) {
-      int i = x + y * w;
-      P.row(i) = Eigen::Vector3d(2 * (double(x) / w) - 1, 2 * (double(y) / h) - 1, 0.0);
-    }
-  }
-  std::cout << "interpolating point cloud..." << std::endl;
-  wos_point_cloud_interpolate(point_cloud, P, U, U_grad);
-
   auto write_solution = [=](const Eigen::VectorXd &u, const char *path) {
     Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> R(w, h);
     Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> G(w, h);
@@ -61,6 +43,34 @@ int main(int argc, char **argv) {
     igl::png::writePNG(R, G, B, A, path);
     std::cout << "write to " << path << std::endl;
   };
+
+  int nquery = w * h;
+  Eigen::MatrixXd P(nquery, 3), U_grad(nquery, 3), sol_grad(nquery, 3);
+  Eigen::VectorXd U(nquery), sol(nquery);
+  Eigen::VectorXd B;
+  B.resize(P.rows());
+  for (int x = 0; x < w; x++) {
+    for (int y = 0; y < h; y++) {
+      int i = x + y * w;
+      P.row(i) = Eigen::Vector3d(2 * (double(x) / w) - 1, 2 * (double(y) / h) - 1, 0.0);
+    }
+  }
+
+  for (int i = 0; i < P.rows(); i++) {
+    B[i] = 0.0;
+    if (abs(sdf(P.row(i))) < 0.01){
+      B[i] = bc(P.row(i));
+    }
+  }
+  write_solution(B, "./boundary condition.png");
+  std::cout << "computing point cloud..." << std::endl;
+  walk_on_spheres3d_region(
+    sdfbc, [](Eigen::Vector3d v) -> double { return 0.0; }, region, Eigen::Vector3d::Zero(), 2.0, 1024, 4096 * 4, total,
+    point_cloud);
+
+  std::cout << "interpolating point cloud..." << std::endl;
+  wos_point_cloud_interpolate(point_cloud, P, U, U_grad);
+
   write_solution(U, "./adaptive.png");
 
   std::cout << "uniform sampling ..." << std::endl;
