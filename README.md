@@ -48,6 +48,17 @@ __TODO__ visualization
 We also implemented the 3-D Helmholtz decomposition as an application of MCGP in graphics. Note that they didn't use the most common definition of the Helmholtz decomposition
 $$X = \nabla u + \nabla\times A,$$ instead, they assume that $u$ and $A$ satisfy homogeneous Dirichlet boundary condition, which results in
 $$X = \nabla u + \nabla\times A + Y.$$ 
+Note that $u$ and $A$ satisfies the scalar Poisson's equation $\nabla^2 u = \nabla\dot X$ and the vector Poisson's equation $\nabla^2 A = \nabla\times X$.
+
+## Demos
+
+#### 2-D Poisson's Equation
+In this examples, we solves a Poisson's equation defined inside a unit disk $D$:
+$$-\nabla^2 u = 8\pi^2\cos(2\pi x)\sin(2\pi x) \quad \text{for } x\in D, $$
+$$u(x,y) = cos(2\pi x)\sin(2\pi x)\quad \text{for } x\in \partial D.$$
+The numerical results are as follows. The left and middle one are the WoS approximations when the number of steps is 1024 and 4096, respectively. The rightmost one is the ground truth.
+
+#### Helmholtz Decomposition
 Note that the decomposition relies on the correct approximation of the gradient of the solutions, so it will demonstrate both the correctness of our gradient approximation, and one of the potential applications of the WoS algorithm. We also implemented a vector field visualizer to illustrate our result. In the following example, we set the input vector field to be $(x^2 \cos(y), xyz, e^{xy})$.
 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree1.jpg" alt="Curl free" width="300"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/curlfree2.jpg" alt="Curl free" width="304"/>
