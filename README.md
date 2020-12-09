@@ -48,6 +48,7 @@ __TODO__ visualization
 We also implemented the 3-D Helmholtz decomposition as an application of MCGP in graphics. Note that they didn't use the most common definition of the Helmholtz decomposition
 $$X = \nabla u + \nabla\times A,$$ instead, they assume that $u$ and $A$ satisfy homogeneous Dirichlet boundary condition, which results in
 $$X = \nabla u + \nabla\times A + Y.$$ 
+Note that $u$ and $A$ satisfies the scalar Poisson's equation $\nabla^2 u = \nabla\dot X$ and the vector Poisson's equation $\nabla^2 A = \nabla\times X$.
 
 ## Demos
 
