@@ -11,6 +11,9 @@ int main(int argc, char **argv) {
   Eigen::MatrixXi F;
   Eigen::VectorXd B;
   wpp = argc > 2 ? std::stoi(argv[2]) : wpp;
+
+  int equation = 0;
+  equation = argc > 3 ? std::stoi(argv[3]) : equation;
   igl::read_triangle_mesh((argc > 1 ? argv[1] : "../data/knot.obj"), V, F);
   for (int i = 0; i < V.rows(); i++) {
     double x = V(i, 0);
@@ -21,15 +24,16 @@ int main(int argc, char **argv) {
   Eigen::MatrixXd VP;
   Eigen::MatrixXi FP;
   // igl::read_triangle_mesh("../data/plane.obj", VP, FP);
-  auto solf = [](Eigen::Vector3d v) -> double { return 1 / (Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(); };
-  auto solf_grad = [](Eigen::Vector3d v) -> Eigen::Vector3d {
-    return (Eigen::Vector3d(1.0, 1.0, 1.0) - v) / pow((Eigen::Vector3d(1.0, 1.0, 1.0) - v).norm(), 3);
-  };
+  auto solf = [](Eigen::Vector3d v) -> double { return 1 / (Eigen::Vector3d(1, 1, 1) - v).norm(); };
   B.resize(V.rows());
   for (int i = 0; i < V.rows(); i++) {
-    auto x = V.row(i).x();
-    double fract = std::fmod((x + 1) * 2, 1.0);
-    B[i] = (fract > 0.5) ? 1.0 : 0.0;
+    if (equation == 1) {
+      auto x = V.row(i).x();
+      double fract = std::fmod((x + 1) * 2, 1.0);
+      B[i] = (fract > 0.5) ? 1.0 : 0.0;
+    } else {
+      B[i] = solf(V.row(i));
+    }
   }
   int w = 256, h = 256;
   int nquery = w * h;
@@ -50,6 +54,31 @@ int main(int argc, char **argv) {
     V, F, B, P, [](Eigen::Vector3d p) { return 0.0; }, wpp, U, U_grad);
   timer.stop();
   std::cout << "took " << timer.getElapsedTimeInSec() << "s" << std::endl;
+  auto write_solution = [=](const Eigen::VectorXd &u, const char *path) {
+    Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> R(w, h);
+    Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> G(w, h);
+    Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> B(w, h);
+    Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> A(w, h);
+    for (int x = 0; x < w; x++) {
+      for (int y = 0; y < h; y++) {
+        int i = x + y * w;
+        auto val = fmin(1.0, fmax(u[i], 0.0));
+        R(x, y) = (unsigned char)(val * 255);
+        G(x, y) = (unsigned char)(val * 255);
+        B(x, y) = (unsigned char)(val * 255);
+        A(x, y) = 255;
+      }
+    }
+    igl::png::writePNG(R, G, B, A, path);
+    std::cout << "write to " << path << std::endl;
+  };
+  write_solution(U, "mesh_fancy.png");
+  Eigen::VectorXd ref;
+  ref.resize(P.rows());
+  for (int i = 0; i < P.rows(); i++) {
+    ref[i] = solf(P.row(i));
+  }
+  write_solution(ref, "mesh_fancy_ref.png");
   igl::opengl::glfw::Viewer viewer;
   const int xid = viewer.selected_data_index;
   viewer.append_mesh();

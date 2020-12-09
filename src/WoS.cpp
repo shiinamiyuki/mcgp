@@ -124,7 +124,7 @@ walk_on_sphere_single_point3d(const std::function<std::pair<double, double>(cons
                               const Eigen::Vector3d &center, double Rmax, int num_walks) {
   const double eps = 0.001;
   const int nWalks = num_walks;
-  const int maxSteps = 32;
+  const int maxSteps = 250;
   VarianceTracker<double> u_var, u_grad_var;
   double sum = 0;
   Eigen::Vector3d sumgrad = Eigen::Vector3d::Zero();
