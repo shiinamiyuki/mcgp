@@ -24,6 +24,8 @@ The authors also introduce two variance reduction techniques for the WoS algorit
 
 Although one of the advantages of the WoS algorithm is that one can evaluate the solution locally, it's often desired to solve a PDE on the whole domain and the WoS algorithm will behave poorly in this setting if without extra handling. Therefore, the author also introduced adaptive sampling and interpolation using moving least squares. The author proposed a simple adaptive sampling scheme that adds a samples if the 1st order taylor expansion at that point cannot approxiate the solution well. 
 
+
+
 ## Build 
 ```
 git clone --recursive http://github.com/shiinamiyuki/mcgp.git
@@ -34,7 +36,8 @@ make -j `nproc`
 We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high-performance BVH building and closest point query. Passing -DLIBIGL_WITH_EMBREE=ON to turn on this feature (OFF by default). It will take around 15 minutes for the first build.
 
 ## Sample Code
-The `tutorials` folder containing many runnable examples.
+The `tutorials` folder contains many runnable examples. Make sure the working directory is `./build`.
+
 
 ## Implementation
 To our best knowledge, as of today, this is the only open-source MCGP with a decent amount of features implemented. 
@@ -70,7 +73,12 @@ Note that the decomposition relies on the correct approximation of the gradient 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree2.jpg" alt="Div free" width="299"/>
 
 #### Adaptive Sampling
+<<<<<<< HEAD
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/uniform.jpg" alt="Div free" width="299"/>
+=======
+We compare adaptive sampling and uniform sampling in solving this lapacian equation with high frequency boundary conditions. Both solution are interpolated using MLS and are run for same amount of walks (adaptive sampling actually uses less walks!). Note uniform sampling performs badly on boundary, where the solution varies most.
+<img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/uniform.png" alt="Uniform Sampling" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/adaptive.png" alt="Adaptive Sampling" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/boundary condition.png" alt="Boundary Condition" width="320"/>
+>>>>>>> 503a9fab3d0cb0b5d6193e8b88fdb7c67291f42d
 
 ## Possible Improvements
 Here is a list of features that we wish we could implement:
