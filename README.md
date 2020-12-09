@@ -33,6 +33,9 @@ make -j `nproc`
 ```
 We use a custom fork of libigl which uses [embree](https://www.embree.org/api.html) for high performance BVH building and closest point query. Passing -DLIBIGL_WITH_EMBREE=ON to turn on this feature (OFF by default). It will take around 15 minutes for the first build.
 
+## Sample Code
+The `tutorials` folder containing many runnable examples.
+
 ## Implementation
 To our best knowledge, as of today, this is the only open source MCGP with decent amount of features implemented. 
 
