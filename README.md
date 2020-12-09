@@ -70,7 +70,8 @@ Note that the decomposition relies on the correct approximation of the gradient 
 <img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree1.jpg" alt="Div free" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/divfree2.jpg" alt="Div free" width="299"/>
 
 #### Adaptive Sampling
-
+We compare adaptive sampling and uniform sampling in solving this lapacian equation with high frequency boundary conditions. Both solution are interpolated using MLS and are run for same amount of walks (adaptive sampling actually uses less walks!). Note uniform sampling performs badly on boundary, where the solution varies most.
+<img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/uniform.png" alt="Uniform Sampling" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/adaptive.png" alt="Adaptive Sampling" width="320"/><img src="https://github.com/shiinamiyuki/mcgp/blob/main/images/boundary condition.png" alt="Boundary Condition" width="320"/>
 
 ## Possible Improvements
 Here is a list of features that we wish we could implement:
