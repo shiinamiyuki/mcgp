@@ -40,8 +40,6 @@ The `tutorials` folder contains many runnable examples. Make sure the working di
 
 
 ## Implementation
-To our best knowledge, as of today, this is the only open-source MCGP with a decent amount of features implemented. 
-
 Our core algorithm is based on SDFs, since they allow one to query the distance between a point and the boundary in $\mathcal{O}(1)$ time, which leads to the most elegant and efficient way to do WoS. Moreover, all our library takes are an SDF that defines the domain, the corresponding boundary condition function, plus a source function defined in the PDE. And for triangle meshes inputs, we constructed a bounding volume hierarchy to speed up the signed distance query.
 
 The effect of control variates is not substantial -- it reduces the variance by around 10% based on numerical experiments. Its implementation is fairly straightforward, except for a possible pitfall that is listed at the bottom of our report. 
